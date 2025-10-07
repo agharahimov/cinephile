@@ -27,9 +27,9 @@ class SecondActivity : AppCompatActivity() {
         email = intent.getStringExtra("EMAIL") ?: ""
         phone = intent.getStringExtra("PHONE") ?: ""
 
-        fullNameTextView.text = "$firstName $lastName"
-        emailTextView.text = "Email: $email"
-        phoneTextView.text = "Phone: $phone"
+        fullNameTextView.text = getString(R.string.full_name_label, firstName, lastName)
+        emailTextView.text = getString(R.string.email_label, email)
+        phoneTextView.text = getString(R.string.phone_label, phone)
 
         shareEmailButton.setOnClickListener {
             shareEmail()
@@ -52,7 +52,7 @@ class SecondActivity : AppCompatActivity() {
     private fun shareSms() {
         val intent = Intent(Intent.ACTION_SENDTO).apply {
             data = Uri.parse("smsto:$phone")
-            putExtra("sms_body", "Hello, this is a default message.")
+            putExtra("sms_body", getString(R.string.sms_default_body))
         }
         if (intent.resolveActivity(packageManager) != null) {
             startActivity(intent)

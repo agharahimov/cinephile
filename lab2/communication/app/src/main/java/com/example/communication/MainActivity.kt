@@ -53,7 +53,6 @@
                 sendData()
             }
 
-            // Restore saved data
             loadData()
         }
 
@@ -66,28 +65,28 @@
             var isValid = true
 
             if (firstNameEditText.text.isNullOrBlank()) {
-                firstNameLayout.error = "First name is required"
+                firstNameLayout.error = getString(R.string.error_first_name_required)
                 isValid = false
             } else {
                 firstNameLayout.error = null
             }
 
             if (lastNameEditText.text.isNullOrBlank()) {
-                lastNameLayout.error = "Last name is required"
+                lastNameLayout.error = getString(R.string.error_last_name_required)
                 isValid = false
             } else {
                 lastNameLayout.error = null
             }
 
             if (emailEditText.text.isNullOrBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(emailEditText.text.toString()).matches()) {
-                emailLayout.error = "A valid email is required"
+                emailLayout.error = getString(R.string.error_email_required)
                 isValid = false
             } else {
                 emailLayout.error = null
             }
 
             if (phoneEditText.text.isNullOrBlank()) {
-                phoneLayout.error = "Phone number is required"
+                phoneLayout.error = getString(R.string.error_phone_required)
                 isValid = false
             } else {
                 phoneLayout.error = null

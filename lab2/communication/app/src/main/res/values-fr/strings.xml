@@ -1,0 +1,27 @@
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Communication</string>
+
+    <!-- MainActivity -->
+    <string name="first_name_hint">Prénom</string>
+    <string name="last_name_hint">Nom de famille</string>
+    <string name="email_hint">Email</string>
+    <string name="phone_number_hint">Numéro de téléphone</string>
+    <string name="clear_button_text">Effacer</string>
+    <string name="send_button_text">Envoyer</string>
+
+    <!-- Validation Errors in MainActivity -->
+    <string name="error_first_name_required">Le prénom est requis</string>
+    <string name="error_last_name_required">Le nom de famille est requis</string>
+    <string name="error_email_required">Un email valide est requis</string>
+    <string name="error_phone_required">Le numéro de téléphone est requis</string>
+
+    <!-- SecondActivity -->
+    <string name="full_name_label">%1$s %2$s</string> <!-- Order is the same in French -->
+    <string name="email_label">Email: %1$s</string>
+    <string name="phone_label">Téléphone: %1$s</string>
+    <string name="share_email_button_text">Partager par email</string>
+    <string name="share_sms_button_text">Partager par SMS</string>
+    <string name="sms_default_body">Bonjour, ceci est un message par défaut.</string>
+
+</resources>
