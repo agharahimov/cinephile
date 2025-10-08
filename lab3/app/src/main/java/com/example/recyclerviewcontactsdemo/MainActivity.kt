@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var contactsRv: RecyclerView
     private lateinit var adapter: ContactAdapter
+    private lateinit var itemTouchHelper: ItemTouchHelper
     private val contactList = mutableListOf<Contact>()
 
     private val addContactLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -48,7 +49,9 @@ class MainActivity : AppCompatActivity() {
         generateDummyContacts()
 
         // Setup RecyclerView
-        adapter = ContactAdapter(contactList)
+        itemTouchHelper = ItemTouchHelper(simpleCallback)
+        itemTouchHelper.attachToRecyclerView(contactsRv)
+        adapter = ContactAdapter(contactList, itemTouchHelper)
         contactsRv.adapter = adapter
         contactsRv.layoutManager = LinearLayoutManager(this) // Displays items in a vertical list
         addContactFab.setOnClickListener {
@@ -56,7 +59,6 @@ class MainActivity : AppCompatActivity() {
             addContactLauncher.launch(intent)
         }
         val itemTouchHelper = ItemTouchHelper(simpleCallback)
-        itemTouchHelper.attachToRecyclerView(contactsRv)
     }
 
     private val simpleCallback = object : ItemTouchHelper.SimpleCallback(

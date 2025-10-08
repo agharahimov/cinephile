@@ -1,14 +1,17 @@
 package com.example.recyclerviewcontactsdemo
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.graphics.Color
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.ViewGroup
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 // The adapter takes the list of contacts as a constructor parameter.
-class ContactAdapter(private val contactList: MutableList<Contact>) : RecyclerView.Adapter<ContactViewHolder>() {
+class ContactAdapter(private val contactList: MutableList<Contact>,  private val itemTouchHelper: ItemTouchHelper) : RecyclerView.Adapter<ContactViewHolder>() {
 
     private var selectedPosition = RecyclerView.NO_POSITION
     // Called when RecyclerView needs a new ViewHolder of the given type to represent an item.
@@ -24,6 +27,7 @@ class ContactAdapter(private val contactList: MutableList<Contact>) : RecyclerVi
         return contactList.size
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     // Called by RecyclerView to display the data at the specified position.
     override fun onBindViewHolder(holder: ContactViewHolder, position: Int) {
         // Get the contact at the given position from our list
@@ -70,12 +74,18 @@ class ContactAdapter(private val contactList: MutableList<Contact>) : RecyclerVi
                 .setTitle("Delete Contact")
                 .setMessage("Are you sure you want to delete ${contact.name}?")
                 .setPositiveButton("Yes") { _, _ ->
-                    contactList.removeAt(holder.adapterPosition)
-                    notifyItemRemoved(holder.adapterPosition)
+                    contactList.removeAt(holder.bindingAdapterPosition)
+                    notifyItemRemoved(holder.bindingAdapterPosition)
                 }
                 .setNegativeButton("No", null)
                 .show()
-            true // Consume the long click event
+            true
+        }
+        holder.dragHandle_iv.setOnTouchListener { _, event ->
+            if (event.actionMasked == MotionEvent.ACTION_DOWN) {
+                itemTouchHelper.startDrag(holder)
+            }
+            true
         }
     }
 }

@@ -7,6 +7,17 @@
     android:layout_height="wrap_content"
     android:padding="16dp">
 
+    <ImageView
+        android:id="@+id/drag_handle_iv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="Drag to reorder"
+        android:src="@android:drawable/ic_menu_sort_by_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="@android:color/darker_gray" />
+
     <!-- Use a CardView for a nice circular shape -->
     <androidx.cardview.widget.CardView
         android:id="@+id/cardView"
@@ -32,7 +43,7 @@
         android:layout_marginStart="16dp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
         android:textColor="@android:color/black"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/drag_handle_iv"
         app:layout_constraintStart_toEndOf="@+id/cardView"
         app:layout_constraintTop_toTopOf="@+id/cardView"
         tools:text="Lucas Durand" />
@@ -43,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:textColor="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/drag_handle_iv"
         app:layout_constraintStart_toStartOf="@+id/contact_name_tv"
         app:layout_constraintTop_toBottomOf="@+id/contact_name_tv"
         tools:text="60 avenue de la République, Marseille" />
@@ -53,7 +64,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/drag_handle_iv"
         app:layout_constraintStart_toStartOf="@+id/contact_address_tv"
         app:layout_constraintTop_toBottomOf="@+id/contact_address_tv"
         tools:text="0564390626" />
@@ -63,7 +74,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:textColor="@android:color/darker_gray"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/drag_handle_iv"
         app:layout_constraintStart_toStartOf="@+id/contact_phone_tv"
         app:layout_constraintTop_toBottomOf="@+id/contact_phone_tv"
         tools:text="l.durand@hotmail.com" />
