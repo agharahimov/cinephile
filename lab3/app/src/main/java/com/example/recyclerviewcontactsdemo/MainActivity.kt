@@ -5,12 +5,34 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import android.app.Activity
+import android.content.Intent
+import androidx.activity.result.contract.ActivityResultContracts
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var contactsRv: RecyclerView
     private lateinit var adapter: ContactAdapter
     private val contactList = mutableListOf<Contact>()
+
+    private val addContactLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = result.data
+            val name = data?.getStringExtra("name") ?: ""
+            val address = data?.getStringExtra("address") ?: ""
+            val phone = data?.getStringExtra("phone") ?: ""
+            val email = data?.getStringExtra("email") ?: ""
+
+            // Create a new contact and add it to the list
+            val newId = (contactList.maxOfOrNull { it.id } ?: 0) + 1
+            val newContact = Contact(newId, name, address, phone, email)
+            contactList.add(newContact)
+
+            // Notify the adapter that a new item has been inserted
+            adapter.notifyItemInserted(contactList.size - 1)
+        }
+    }
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,6 +49,10 @@ class MainActivity : AppCompatActivity() {
         adapter = ContactAdapter(contactList)
         contactsRv.adapter = adapter
         contactsRv.layoutManager = LinearLayoutManager(this) // Displays items in a vertical list
+        addContactFab.setOnClickListener {
+            val intent = Intent(this, AddContactActivity::class.java)
+            addContactLauncher.launch(intent)
+        }
     }
 
     private fun generateDummyContacts() {
