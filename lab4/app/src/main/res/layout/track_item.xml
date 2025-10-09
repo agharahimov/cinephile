@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="4dp"
+    app:cardCornerRadius="8dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <ImageView
+            android:id="@+id/albumCoverImageView"
+            android:layout_width="match_parent"
+            android:layout_height="180dp"
+            android:scaleType="centerCrop"
+            tools:src="@tools:sample/backgrounds/scenic" />
+
+        <TextView
+            android:id="@+id/albumTitleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#616161"
+            android:padding="4dp"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            tools:text="Album Title" />
+
+        <TextView
+            android:id="@+id/songTitleTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#757575"
+            android:padding="4dp"
+            android:textColor="@android:color/white"
+            tools:text="Song Title" />
+
+        <TextView
+            android:id="@+id/artistNameTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#9E9E9E"
+            android:padding="4dp"
+            android:textColor="@android:color/white"
+            tools:text="Artist" />
+
+    </LinearLayout>
+</androidx.cardview.widget.CardView>
