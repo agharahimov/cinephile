@@ -1,16 +1,27 @@
-//package com.example.cinephile.ui.search
-//
-//import org.junit.Assert.assertTrue
-//import org.junit.Test
-//
-//class SearchViewModelTest {
-//
-//    // This is a placeholder test that will be expanded in the next task.
-//    // It follows the TDD principle of writing a test first.
-//    @Test
-//    fun `searchMovies should trigger a repository call`() {
-//        // This test is designed to fail initially.
-//        // We will implement the logic to make it pass.
-//        assertTrue("Test not implemented", false)
-//    }
-//}
+package com.example.cinephile.ui.search
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.cinephile.domain.model.Movie
+import com.example.cinephile.domain.repository.MovieRepository
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+class SearchViewModel(private val repository: MovieRepository) : ViewModel() {
+
+    private val _uiState = MutableStateFlow<List<Movie>>(emptyList())
+    val uiState: StateFlow<List<Movie>> = _uiState
+
+    fun searchMovies(query: String) {
+        viewModelScope.launch {
+            val result = repository.searchMovies(query)
+            result.onSuccess { movies ->
+                _uiState.value = movies
+            }
+            // TODO: Handle result.onFailure in a future task
+        }
+    }
+}
