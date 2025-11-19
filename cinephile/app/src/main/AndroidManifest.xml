@@ -10,7 +10,7 @@
         android:label="@string/app_name"
         android:roundIcon="@drawable/_foreground"
         android:supportsRtl="true"
-        android:theme="@style/Theme.Cinephile">
+        android:theme="@style/Theme.App.Starting">
         <activity
             android:name=".MainActivity"
             android:exported="true">
