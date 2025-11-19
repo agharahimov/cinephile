@@ -6,4 +6,26 @@
     </style>
 
     <style name="Theme.Cinephile" parent="Base.Theme.Cinephile" />
+
+    <!-- ================================================== -->
+    <!-- ADDED: Animated Splash Screen Theme                -->
+    <!-- ================================================== -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <!-- 1. Background color of the loading screen (White matches your icon) -->
+        <item name="windowSplashScreenBackground">#FDF7FF</item>
+
+        <item name="windowSplashScreenIconBackgroundColor">#FDF7FF</item>
+        <!-- 2. Point to your animated XML file -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/animated_clapperboard</item>
+
+        <!-- 3. How long the animation stays (1000ms = 1 second) -->
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+
+        <!-- 4. After loading, switch to your main app theme -->
+        <item name="postSplashScreenTheme">@style/Theme.Cinephile</item>
+    </style>
+    <style name="CircleImage" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
 </resources>
