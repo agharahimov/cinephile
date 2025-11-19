@@ -19,7 +19,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var searchButton: Button
     private lateinit var recyclerView: RecyclerView
 
-    // Instantiate the ViewModel using the KTX extension
     private val viewModel: TracksViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,26 +29,19 @@ class MainActivity : AppCompatActivity() {
         searchButton = findViewById(R.id.searchButton)
         recyclerView = findViewById(R.id.recyclerView)
 
-        // Set up the RecyclerView with a GridLayoutManager
         recyclerView.layoutManager = GridLayoutManager(this, 2) // 2 columns
 
-        // --- Create the observer for the ViewModel's LiveData ---
         val observer = Observer<DeezerSearchResponse> { response ->
-            // This code will run every time the LiveData changes.
             recyclerView.adapter = TrackAdapter(response.data)
         }
-        // Observe the LiveData, passing in this activity as the LifecycleOwner and the observer.
         viewModel.data.observe(this, observer)
 
-        // --- Set up the search button click listener ---
         searchButton.setOnClickListener {
             val searchText = searchEditText.text.toString()
 
-            // What happens if a search is initiated with an empty query?
             if (searchText.isBlank()) {
                 Toast.makeText(this, "Search query cannot be empty", Toast.LENGTH_SHORT).show()
             } else {
-                // Trigger the search in the ViewModel
                 viewModel.search(searchText)
             }
         }

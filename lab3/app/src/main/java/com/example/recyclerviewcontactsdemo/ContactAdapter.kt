@@ -11,7 +11,9 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 
 // The adapter takes the list of contacts as a constructor parameter.
-class ContactAdapter(private val contactList: MutableList<Contact>,  private val itemTouchHelper: ItemTouchHelper) : RecyclerView.Adapter<ContactViewHolder>() {
+class ContactAdapter(private val contactList: MutableList<Contact>,
+                     private val itemTouchHelper: ItemTouchHelper)
+    : RecyclerView.Adapter<ContactViewHolder>() {
 
     private var selectedPosition = RecyclerView.NO_POSITION
     // Called when RecyclerView needs a new ViewHolder of the given type to represent an item.
@@ -33,7 +35,6 @@ class ContactAdapter(private val contactList: MutableList<Contact>,  private val
         // Get the contact at the given position from our list
         val contact = contactList[position]
 
-        // Bind the data from our contact object to the views in the ViewHolder
         holder.name_tv.text = contact.name
         holder.address_tv.text = contact.address
         holder.phone_tv.text = contact.phone
@@ -47,28 +48,23 @@ class ContactAdapter(private val contactList: MutableList<Contact>,  private val
 
         // --- Handle Click and Long Click ---
 
-        // Change background color based on selection
         if (selectedPosition == position) {
             holder.itemLayout.setBackgroundColor(Color.LTGRAY)
         } else {
             holder.itemLayout.setBackgroundColor(Color.TRANSPARENT)
         }
 
-        // Click listener
         holder.itemLayout.setOnClickListener {
             if (selectedPosition != holder.adapterPosition) {
-                // A new item is selected
-                notifyItemChanged(selectedPosition) // Un-highlight the old one
+                notifyItemChanged(selectedPosition)
                 selectedPosition = holder.adapterPosition
-                notifyItemChanged(selectedPosition) // Highlight the new one
+                notifyItemChanged(selectedPosition)
             } else {
-                // The same item is clicked again, so deselect it
                 notifyItemChanged(selectedPosition)
                 selectedPosition = RecyclerView.NO_POSITION
             }
         }
 
-        // Long click listener for deletion
         holder.itemLayout.setOnLongClickListener {
             AlertDialog.Builder(holder.itemView.context)
                 .setTitle("Delete Contact")
