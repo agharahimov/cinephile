@@ -12,7 +12,6 @@ import com.example.deezerapidemo.model.Track
 
 class TrackAdapter(private val tracks: List<Track>) : RecyclerView.Adapter<TrackAdapter.TrackViewHolder>() {
 
-    // The ViewHolder is an inner class of the Adapter.
     inner class TrackViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val albumCoverImageView: ImageView = view.findViewById(R.id.albumCoverImageView)
         val albumTitleTextView: TextView = view.findViewById(R.id.albumTitleTextView)

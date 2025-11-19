@@ -16,7 +16,6 @@ data class Album(
     val id: String,
     val title: String,
     val cover: String
-    // Removed the 'tracks' list to prevent circular dependencies
 )
 
 data class Artist(
