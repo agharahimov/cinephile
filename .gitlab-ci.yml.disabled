@@ -1,0 +1,42 @@
+# Use a standard Docker image with the Android SDK pre-installed
+image: reactivecircus/android-developer:latest
+
+# Define the stages of our pipeline
+stages:
+  - test
+  - build
+
+# Cache Gradle dependencies and wrappers to speed up future pipeline runs
+cache:
+  key: "$CI_COMMIT_REF_NAME" # Cache per branch
+  paths:
+    - .gradle/
+
+# This block runs before each job
+before_script:
+  # The gradlew file needs executable permissions to run
+  - chmod +x ./gradlew
+
+# Job 1: Run all unit tests
+unit_tests:
+  stage: test
+  script:
+    # Execute the unit test task
+    - ./gradlew testDebugUnitTest
+  artifacts:
+    when: always
+    reports:
+      # Expose test results directly in the GitLab UI
+      junit: app/build/test-results/testDebugUnitTest/TEST-*.xml
+
+# Job 2: Assemble the debug APK
+build_apk:
+  stage: build
+  script:
+    # Execute the assemble task
+    - ./gradlew assembleDebug
+  artifacts:
+    # Save the generated APK as a downloadable file in the GitLab job results
+    name: "Cinephile-Debug-Build"
+    paths:
+      - app/build/outputs/apk/debug/app-debug.apk
