@@ -11,6 +11,7 @@
         android:roundIcon="@drawable/_foreground"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting">
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

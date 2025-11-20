@@ -1,30 +1,26 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- 1. BASE THEME: correctly set to NoActionBar -->
     <style name="Base.Theme.Cinephile" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <!-- Customize your colors here if needed -->
+        <item name="colorPrimary">#6200EE</item>
+        <item name="colorPrimaryVariant">#3700B3</item>
+        <item name="colorOnPrimary">@color/white</item>
     </style>
 
     <style name="Theme.Cinephile" parent="Base.Theme.Cinephile" />
 
-    <!-- ================================================== -->
-    <!-- ADDED: Animated Splash Screen Theme                -->
-    <!-- ================================================== -->
+    <!-- 2. SPLASH SCREEN THEME -->
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
-        <!-- 1. Background color of the loading screen (White matches your icon) -->
         <item name="windowSplashScreenBackground">#FDF7FF</item>
-
         <item name="windowSplashScreenIconBackgroundColor">#FDF7FF</item>
-        <!-- 2. Point to your animated XML file -->
         <item name="windowSplashScreenAnimatedIcon">@drawable/animated_clapperboard</item>
-
-        <!-- 3. How long the animation stays (1000ms = 1 second) -->
         <item name="windowSplashScreenAnimationDuration">1000</item>
-
-        <!-- 4. After loading, switch to your main app theme -->
         <item name="postSplashScreenTheme">@style/Theme.Cinephile</item>
     </style>
-    <style name="CircleImage" parent="">
+
+    <!-- 3. HELPER STYLES -->
+    <!-- Fixed: Removed empty parent="" -->
+    <style name="CircleImage" parent="ShapeAppearance.Material3.Corner.Medium">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
