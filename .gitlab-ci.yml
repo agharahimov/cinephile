@@ -1,5 +1,5 @@
 # Use a standard Docker image with the Android SDK pre-installed
-image: antych/android-ci:2.1.0
+image: reactivecircus/android-developer:latest
 
 # Define the stages of our pipeline
 stages:
