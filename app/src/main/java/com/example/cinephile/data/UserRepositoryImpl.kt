@@ -4,29 +4,47 @@ import com.example.cinephile.data.local.UserDao
 import com.example.cinephile.data.local.UserEntity
 import com.example.cinephile.domain.repository.UserRepository
 
-// This implementation only uses the local DAO for now
 class UserRepositoryImpl(private val userDao: UserDao) : UserRepository {
 
-    override suspend fun login(email: String, password: String): Result<Int> {
+    override suspend fun login(email: String, pass: String): Result<UserEntity> {
+        // 1. Find user by email
         val user = userDao.getUserByEmail(email)
-            ?: return Result.failure(Exception("User not found"))
 
-        // FAKE password check. In a real app, you'd compare hashes.
-        if (user.passwordHash == password) {
-            return Result.success(user.id)
+        // 2. Check if user exists
+        if (user == null) {
+            return Result.failure(Exception("User not found"))
+        }
+
+        // 3. Check password
+        if (user.password == pass) {
+            return Result.success(user)
         } else {
             return Result.failure(Exception("Invalid password"))
         }
     }
 
-    override suspend fun register(email: String, password: String): Result<Unit> {
+    override suspend fun register(username: String, email: String, pass: String): Result<Unit> {
         return try {
-            // FAKE hashing. In a real app, use a proper hashing library like BCrypt.
-            val newUser = UserEntity(email = email, passwordHash = password)
+            // Check if user already exists
+            if (userDao.getUserByEmail(email) != null) {
+                return Result.failure(Exception("Email already exists"))
+            }
+
+            // Create and Insert
+            val newUser = UserEntity(
+                username = username,
+                email = email,
+                password = pass
+            )
             userDao.insertUser(newUser)
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)
         }
+    }
+
+    override suspend fun userExists(email: String): Boolean {
+        return userDao.getUserByEmail(email) != null
     }
 }

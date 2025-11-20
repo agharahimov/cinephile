@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- 1. THE VIDEO BACKGROUND -->
+    <!-- 1. VIDEO BACKGROUND (SAME) -->
     <VideoView
         android:id="@+id/videoViewBackground"
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 2. DARK OVERLAY -->
+    <!-- 2. DARK OVERLAY (SAME) -->
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -28,7 +28,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 3. APP LOGO IMAGE -->
+    <!-- 3. APP LOGO (SAME) -->
     <ImageView
         android:id="@+id/ivAppLogo"
         android:layout_width="280dp"
@@ -52,18 +52,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/ivAppLogo" />
 
-    <!-- 4. BUTTONS CONTAINER -->
+    <!-- ============================================================== -->
+    <!-- 4. INTRO CONTAINER (Your Buttons Wrapped)                      -->
+    <!-- ============================================================== -->
     <LinearLayout
+        android:id="@+id/layoutIntro"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="32dp"
+        android:visibility="visible"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
         <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSignUp"
+            android:id="@+id/btnShowSignUp"
             android:layout_width="match_parent"
             android:layout_height="60dp"
             android:text="Sign Up"
@@ -88,7 +92,7 @@
             android:layout_marginBottom="24dp"/>
 
         <TextView
-            android:id="@+id/tvLoginOption"
+            android:id="@+id/btnShowLogin"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -97,7 +101,121 @@
             android:textSize="14sp"
             android:clickable="true"
             android:focusable="true" />
+    </LinearLayout>
 
+    <!-- ============================================================== -->
+    <!-- 5. SIGN UP FORM (HIDDEN - Added so logic works)                -->
+    <!-- ============================================================== -->
+    <LinearLayout
+        android:id="@+id/layoutSignUp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/etSignUser"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Username"
+            android:background="@android:color/white"
+            android:padding="10dp"
+            android:layout_marginBottom="10dp"/>
+
+        <EditText
+            android:id="@+id/etSignEmail"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:background="@android:color/white"
+            android:padding="10dp"
+            android:layout_marginBottom="10dp"/>
+
+        <EditText
+            android:id="@+id/etSignPass"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:background="@android:color/white"
+            android:padding="10dp"
+            android:layout_marginBottom="20dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Create Account"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            android:backgroundTint="#6200EE" />
+
+        <TextView
+            android:id="@+id/tvBackFromSignUp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textColor="#DDDDDD"
+            android:layout_gravity="center"
+            android:padding="16dp" />
+    </LinearLayout>
+
+    <!-- ============================================================== -->
+    <!-- 6. LOGIN FORM (HIDDEN - Added so logic works)                  -->
+    <!-- ============================================================== -->
+    <LinearLayout
+        android:id="@+id/layoutLogin"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="32dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <EditText
+            android:id="@+id/etLoginEmail"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Email"
+            android:inputType="textEmailAddress"
+            android:background="@android:color/white"
+            android:padding="10dp"
+            android:layout_marginBottom="10dp"/>
+
+        <EditText
+            android:id="@+id/etLoginPass"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:background="@android:color/white"
+            android:padding="10dp"
+            android:layout_marginBottom="20dp"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnConfirmLogin"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Log In"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            android:backgroundTint="#6200EE" />
+
+        <TextView
+            android:id="@+id/tvBackFromLogin"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cancel"
+            android:textColor="#DDDDDD"
+            android:layout_gravity="center"
+            android:padding="16dp" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

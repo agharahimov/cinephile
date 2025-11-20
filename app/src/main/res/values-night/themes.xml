@@ -1,7 +1,27 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
+    <!-- 1. BASE THEME: correctly set to NoActionBar -->
     <style name="Base.Theme.Cinephile" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your dark theme here. -->
-        <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
+        <!-- Customize your colors here if needed -->
+        <item name="colorPrimary">#6200EE</item>
+        <item name="colorPrimaryVariant">#3700B3</item>
+        <item name="colorOnPrimary">@color/white</item>
+    </style>
+
+    <style name="Theme.Cinephile" parent="Base.Theme.Cinephile" />
+
+    <!-- 2. SPLASH SCREEN THEME -->
+    <style name="Theme.App.Starting" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#FDF7FF</item>
+        <item name="windowSplashScreenIconBackgroundColor">#FDF7FF</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/animated_clapperboard</item>
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        <item name="postSplashScreenTheme">@style/Theme.Cinephile</item>
+    </style>
+
+    <!-- 3. HELPER STYLES -->
+    <!-- Fixed: Removed empty parent="" -->
+    <style name="CircleImage" parent="ShapeAppearance.Material3.Corner.Medium">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
     </style>
 </resources>
