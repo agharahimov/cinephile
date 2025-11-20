@@ -1,9 +1,10 @@
 package com.example.cinephile
 
-import android.content.Intent // Import Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.view.View
+import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.fragment.NavHostFragment
@@ -12,42 +13,39 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        // ==============================================================
-        // 1. ANIMATED SPLASH SCREEN LOGIC
-        // ==============================================================
+        // Splash Screen
         val splashScreen = installSplashScreen()
-
-        // Force the app to wait 2000ms (2 seconds) so the animation plays fully.
         var keepSplashOnScreen = true
         splashScreen.setKeepOnScreenCondition { keepSplashOnScreen }
+        Handler(Looper.getMainLooper()).postDelayed({ keepSplashOnScreen = false }, 1000)
 
-        Handler(Looper.getMainLooper()).postDelayed({
-            // This runs after 2 seconds
-            keepSplashOnScreen = false
-
-            // ==========================================================
-            // 2. NAVIGATE TO LOGIN SCREEN (Integrated Code)
-            // ==========================================================
-            val intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
-            finish() // This closes MainActivity so the user can't go back to the splash
-
-        }, 1000)
-
-        // ==============================================================
-        // 3. STANDARD APP SETUP
-        // (This loads in the background while the splash is showing)
-        // ==============================================================
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Note: Even though we set this up, the user won't see it yet
-        // because we redirect to LoginActivity immediately after the splash.
+        // Navigation Setup
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
+        val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+        bottomNav.setupWithNavController(navController)
 
-        findViewById<BottomNavigationView>(R.id.bottom_navigation)
-            .setupWithNavController(navController)
+        // VISIBILITY LOGIC
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            if (destination.id == R.id.loginFragment) {
+                // --- LOGIN SCREEN ---
+                // 1. Hide Bottom Bar
+                bottomNav.visibility = View.GONE
+
+                // 2. Hide Status Bar (Battery/Time) for Immersion
+                window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            } else {
+                // --- HOME SCREEN ---
+                // 1. Show Bottom Bar
+                bottomNav.visibility = View.VISIBLE
+
+                // 2. Show Status Bar
+                window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            }
+        }
     }
 }

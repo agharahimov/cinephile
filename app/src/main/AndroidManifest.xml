@@ -11,11 +11,7 @@
         android:roundIcon="@drawable/_foreground"
         android:supportsRtl="true"
         android:theme="@style/Theme.App.Starting">
-        <activity
-            android:name=".LoginActivity"
-            android:exported="false"
-            android:theme="@style/Theme.Cinephile">
-        </activity>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
