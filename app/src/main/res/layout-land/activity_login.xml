@@ -7,79 +7,77 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- 1. THE VIDEO BACKGROUND -->
+    <!-- 1. VIDEO BACKGROUND (Same as Portrait) -->
     <VideoView
         android:id="@+id/videoViewBackground"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 2. DARK OVERLAY -->
-
-    <!-- 3. APP LOGO IMAGE (Replaces the old TextView) -->
+    <!-- 2. DARK OVERLAY (Same as Portrait) -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#80000000"
-        tools:layout_editor_absoluteX="0dp"
-        tools:layout_editor_absoluteY="-16dp" />
+        android:background="#80000000" />
 
-    <!-- Subtitle (Updated to sit below the new Image) -->
-
-    <!-- 4. BUTTONS CONTAINER -->
+    <!-- 3. LOGO (Moved to TOP LEFT & Made Smaller) -->
     <ImageView
         android:id="@+id/ivAppLogo"
-        android:layout_width="280dp"
+        android:layout_width="200dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:adjustViewBounds="true"
         android:src="@drawable/logo_white"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.496"
+        android:adjustViewBounds="true"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="32dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <!-- Subtitle (Aligned with Logo) -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="-120dp"
         android:text="Watch. Review. Share."
         android:textColor="#DDDDDD"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
+        android:textSize="14sp"
+        android:layout_marginTop="-30dp"
+        app:layout_constraintEnd_toEndOf="@id/ivAppLogo"
+        app:layout_constraintStart_toStartOf="@id/ivAppLogo"
         app:layout_constraintTop_toBottomOf="@id/ivAppLogo" />
 
+    <!-- 4. BUTTONS (Moved to BOTTOM RIGHT) -->
+    <!-- We use a fixed width (300dp) so buttons don't stretch too wide -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="32dp"
+        android:padding="16dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.8">
 
         <!-- Option 1: Sign Up -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnSignUp"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="55dp"
             android:text="Sign Up"
             android:textSize="16sp"
             android:textStyle="bold"
             app:cornerRadius="30dp"
             android:backgroundTint="#6200EE"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginBottom="12dp"/>
 
         <!-- Option 2: Guest -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuest"
             android:layout_width="match_parent"
-            android:layout_height="60dp"
+            android:layout_height="55dp"
             android:text="Continue as a Guest"
             android:textSize="16sp"
             android:textStyle="bold"
@@ -88,7 +86,7 @@
             app:strokeColor="@android:color/white"
             app:strokeWidth="2dp"
             android:backgroundTint="@android:color/transparent"
-            android:layout_marginBottom="24dp"/>
+            android:layout_marginBottom="16dp"/>
 
         <!-- Option 3: Log In -->
         <TextView
