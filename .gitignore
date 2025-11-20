@@ -1,0 +1,17 @@
+# Android Studio / IntelliJ
+*.iml
+.idea/
+.gradle/
+
+# Local Properties
+local.properties
+
+# Build Files
+/build/
+/app/build/
+captures/
+*.apk
+*.aab
+
+# OS Files
+.DS_Store
