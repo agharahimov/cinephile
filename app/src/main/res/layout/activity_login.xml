@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black">
+
+    <!-- 1. THE VIDEO BACKGROUND -->
+    <!-- We force it to be large to fill the screen -->
+    <VideoView
+        android:id="@+id/videoViewBackground"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <!-- 2. DARK OVERLAY -->
+    <!-- This makes the video darker so buttons are readable -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#80000000" />
+
+    <!-- 3. APP LOGO / TITLE -->
+    <TextView
+        android:id="@+id/tvLoginTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cinephile"
+        android:textColor="@android:color/white"
+        android:textSize="40sp"
+        android:textStyle="bold"
+        android:layout_marginTop="100dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Watch. Review. Share."
+        android:textColor="#DDDDDD"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tvLoginTitle" />
+
+    <!-- 4. BUTTONS CONTAINER -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <!-- Option 1: Sign Up (Primary) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnSignUp"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Sign Up"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="30dp"
+            android:backgroundTint="#6200EE"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Option 2: Guest (Secondary) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnGuest"
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:text="Continue as a Guest"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            app:cornerRadius="30dp"
+            app:strokeColor="@android:color/white"
+            app:strokeWidth="2dp"
+            android:backgroundTint="@android:color/transparent"
+            android:layout_marginBottom="24dp"/>
+
+        <!-- Option 3: The "Different" Option (Log In) -->
+        <TextView
+            android:id="@+id/tvLoginOption"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="Already have an account? Log In"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:clickable="true"
+            android:focusable="true" />
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
