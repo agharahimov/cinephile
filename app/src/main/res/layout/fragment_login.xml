@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- 1. VIDEO BACKGROUND (SAME) -->
+    <!-- 1. VIDEO BACKGROUND -->
     <VideoView
         android:id="@+id/videoViewBackground"
         android:layout_width="match_parent"
@@ -18,7 +18,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 2. DARK OVERLAY (SAME) -->
+    <!-- 2. DARK OVERLAY -->
     <View
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -28,7 +28,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
-    <!-- 3. APP LOGO (SAME) -->
+    <!-- 3. APP LOGO -->
     <ImageView
         android:id="@+id/ivAppLogo"
         android:layout_width="280dp"
@@ -53,7 +53,7 @@
         app:layout_constraintTop_toBottomOf="@id/ivAppLogo" />
 
     <!-- ============================================================== -->
-    <!-- 4. INTRO CONTAINER (Your Buttons Wrapped)                      -->
+    <!-- 4. INTRO CONTAINER (Visible by default)                        -->
     <!-- ============================================================== -->
     <LinearLayout
         android:id="@+id/layoutIntro"
@@ -104,7 +104,7 @@
     </LinearLayout>
 
     <!-- ============================================================== -->
-    <!-- 5. SIGN UP FORM (HIDDEN - Added so logic works)                -->
+    <!-- 5. SIGN UP FORM (Hidden by default)                            -->
     <!-- ============================================================== -->
     <LinearLayout
         android:id="@+id/layoutSignUp"
@@ -117,14 +117,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <!-- UPDATED TO GLASS STYLE -->
         <EditText
             android:id="@+id/etSignUser"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="Username"
-            android:background="@android:color/white"
-            android:padding="10dp"
-            android:layout_marginBottom="10dp"/>
+            android:inputType="textPersonName"
+            android:background="@drawable/bg_input_glass"
+            android:textColor="@android:color/white"
+            android:textColorHint="#CCCCCC"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_marginBottom="12dp"/>
 
         <EditText
             android:id="@+id/etSignEmail"
@@ -132,9 +137,12 @@
             android:layout_height="50dp"
             android:hint="Email"
             android:inputType="textEmailAddress"
-            android:background="@android:color/white"
-            android:padding="10dp"
-            android:layout_marginBottom="10dp"/>
+            android:background="@drawable/bg_input_glass"
+            android:textColor="@android:color/white"
+            android:textColorHint="#CCCCCC"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_marginBottom="12dp"/>
 
         <EditText
             android:id="@+id/etSignPass"
@@ -142,9 +150,12 @@
             android:layout_height="50dp"
             android:hint="Password"
             android:inputType="textPassword"
-            android:background="@android:color/white"
-            android:padding="10dp"
-            android:layout_marginBottom="20dp"/>
+            android:background="@drawable/bg_input_glass"
+            android:textColor="@android:color/white"
+            android:textColorHint="#CCCCCC"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_marginBottom="24dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConfirmSignUp"
@@ -166,7 +177,7 @@
     </LinearLayout>
 
     <!-- ============================================================== -->
-    <!-- 6. LOGIN FORM (HIDDEN - Added so logic works)                  -->
+    <!-- 6. LOGIN FORM (Hidden by default)                              -->
     <!-- ============================================================== -->
     <LinearLayout
         android:id="@+id/layoutLogin"
@@ -179,15 +190,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
+        <!-- UPDATED TO GLASS STYLE -->
         <EditText
             android:id="@+id/etLoginEmail"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="Email"
             android:inputType="textEmailAddress"
-            android:background="@android:color/white"
-            android:padding="10dp"
-            android:layout_marginBottom="10dp"/>
+            android:background="@drawable/bg_input_glass"
+            android:textColor="@android:color/white"
+            android:textColorHint="#CCCCCC"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_marginBottom="12dp"/>
 
         <EditText
             android:id="@+id/etLoginPass"
@@ -195,9 +210,12 @@
             android:layout_height="50dp"
             android:hint="Password"
             android:inputType="textPassword"
-            android:background="@android:color/white"
-            android:padding="10dp"
-            android:layout_marginBottom="20dp"/>
+            android:background="@drawable/bg_input_glass"
+            android:textColor="@android:color/white"
+            android:textColorHint="#CCCCCC"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:layout_marginBottom="24dp"/>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConfirmLogin"

@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- 1. VIDEO BACKGROUND (Same as Portrait) -->
+    <!-- 1. VIDEO BACKGROUND -->
     <VideoView
         android:id="@+id/videoViewBackground"
         android:layout_width="match_parent"
@@ -17,13 +17,13 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 2. DARK OVERLAY (Same as Portrait) -->
+    <!-- 2. DARK OVERLAY (Unchanged) -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#80000000" />
 
-    <!-- 3. LOGO (Moved to TOP LEFT & Made Smaller) -->
+    <!-- 3. LOGO (Top Left - Unchanged) -->
     <ImageView
         android:id="@+id/ivAppLogo"
         android:layout_width="200dp"
@@ -35,7 +35,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Subtitle (Aligned with Logo) -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -47,13 +46,11 @@
         app:layout_constraintStart_toStartOf="@id/ivAppLogo"
         app:layout_constraintTop_toBottomOf="@id/ivAppLogo" />
 
-    <!-- 4. BUTTONS (Moved to BOTTOM RIGHT) -->
-    <!-- We use a fixed width (300dp) so buttons don't stretch too wide -->
-    <LinearLayout
-        android:layout_width="300dp"
+    <!-- 4. RIGHT SIDE CONTAINER (Wrapped in ScrollView for safety) -->
+    <!-- This sits at the Bottom Right, exactly where you put it -->
+    <ScrollView
+        android:layout_width="320dp"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -61,45 +58,191 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.8">
 
-        <!-- Option 1: Sign Up -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnSignUp"
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:text="Sign Up"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            app:cornerRadius="30dp"
-            android:backgroundTint="#6200EE"
-            android:layout_marginBottom="12dp"/>
+            android:layout_height="wrap_content">
 
-        <!-- Option 2: Guest -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnGuest"
-            android:layout_width="match_parent"
-            android:layout_height="55dp"
-            android:text="Continue as a Guest"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:textColor="@android:color/white"
-            app:cornerRadius="30dp"
-            app:strokeColor="@android:color/white"
-            app:strokeWidth="2dp"
-            android:backgroundTint="@android:color/transparent"
-            android:layout_marginBottom="16dp"/>
+            <!-- STATE A: INTRO BUTTONS (Visible by default) -->
+            <!-- I wrapped your buttons in this ID so Kotlin finds it -->
+            <LinearLayout
+                android:id="@+id/layoutIntro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="visible">
 
-        <!-- Option 3: Log In -->
-        <TextView
-            android:id="@+id/tvLoginOption"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="Already have an account? Log In"
-            android:textColor="@android:color/white"
-            android:textSize="14sp"
-            android:clickable="true"
-            android:focusable="true" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnShowSignUp"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:text="Sign Up"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    app:cornerRadius="30dp"
+                    android:backgroundTint="#6200EE"
+                    android:layout_marginBottom="12dp"/>
 
-    </LinearLayout>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGuest"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:text="Continue as a Guest"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@android:color/white"
+                    app:cornerRadius="30dp"
+                    app:strokeColor="@android:color/white"
+                    app:strokeWidth="2dp"
+                    android:backgroundTint="@android:color/transparent"
+                    android:layout_marginBottom="16dp"/>
+
+                <TextView
+                    android:id="@+id/btnShowLogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:minHeight="48dp"
+                    android:gravity="center"
+                    android:text="Already have an account? Log In"
+                    android:textColor="@android:color/white"
+                    android:textSize="14sp"
+                    android:clickable="true"
+                    android:focusable="true" />
+            </LinearLayout>
+
+            <!-- STATE B: SIGN UP FORM (Hidden) -->
+            <!-- Added this so the app doesn't crash when you click Sign Up -->
+            <LinearLayout
+                android:id="@+id/layoutSignUp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Create Account"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="12dp"/>
+
+                <EditText
+                    android:id="@+id/etSignUser"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:hint="Username"
+                    android:background="@drawable/bg_input_glass"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="#CCCCCC"
+                    android:padding="10dp"
+                    android:layout_marginBottom="8dp"/>
+
+                <EditText
+                    android:id="@+id/etSignEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:hint="Email"
+                    android:background="@drawable/bg_input_glass"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="#CCCCCC"
+                    android:padding="10dp"
+                    android:layout_marginBottom="8dp"/>
+
+                <EditText
+                    android:id="@+id/etSignPass"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:background="@drawable/bg_input_glass"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="#CCCCCC"
+                    android:padding="10dp"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConfirmSignUp"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:text="Create Account"
+                    app:cornerRadius="30dp"
+                    android:backgroundTint="#6200EE"/>
+
+                <TextView
+                    android:id="@+id/tvBackFromSignUp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel"
+                    android:textColor="#DDDDDD"
+                    android:layout_gravity="center"
+                    android:padding="12dp" />
+            </LinearLayout>
+
+            <!-- STATE C: LOGIN FORM (Hidden) -->
+            <!-- Added this so the app doesn't crash when you click Log In -->
+            <LinearLayout
+                android:id="@+id/layoutLogin"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Welcome Back"
+                    android:textColor="@android:color/white"
+                    android:textSize="20sp"
+                    android:gravity="center"
+                    android:layout_marginBottom="12dp"/>
+
+                <EditText
+                    android:id="@+id/etLoginEmail"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:hint="Email"
+                    android:background="@drawable/bg_input_glass"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="#CCCCCC"
+                    android:padding="10dp"
+                    android:layout_marginBottom="8dp"/>
+
+                <EditText
+                    android:id="@+id/etLoginPass"
+                    android:layout_width="match_parent"
+                    android:layout_height="45dp"
+                    android:hint="Password"
+                    android:inputType="textPassword"
+                    android:background="@drawable/bg_input_glass"
+                    android:textColor="@android:color/white"
+                    android:textColorHint="#CCCCCC"
+                    android:padding="10dp"
+                    android:layout_marginBottom="12dp"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnConfirmLogin"
+                    android:layout_width="match_parent"
+                    android:layout_height="55dp"
+                    android:text="Log In"
+                    app:cornerRadius="30dp"
+                    android:backgroundTint="#6200EE"/>
+
+                <TextView
+                    android:id="@+id/tvBackFromLogin"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cancel"
+                    android:textColor="#DDDDDD"
+                    android:layout_gravity="center"
+                    android:padding="12dp" />
+            </LinearLayout>
+
+        </FrameLayout>
+    </ScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
