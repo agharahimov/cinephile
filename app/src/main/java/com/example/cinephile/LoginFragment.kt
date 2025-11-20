@@ -20,11 +20,14 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
     private lateinit var viewModel: AuthViewModel
     private lateinit var videoView: VideoView
 
+    // Variable to save video playback position on rotation
+    private var currentVideoPosition: Int = 0
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         // =================================================================
-        // 1. DEFINE ALL VIEWS FIRST (This fixes the "Unresolved reference" errors)
+        // 1. DEFINE ALL VIEWS FIRST
         // =================================================================
 
         // Layout Containers
@@ -41,10 +44,10 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         val etLoginEmail: EditText = view.findViewById(R.id.etLoginEmail)
         val etLoginPass: EditText = view.findViewById(R.id.etLoginPass)
 
-        // Buttons (We find them here to use in listeners below)
+        // Buttons
         val btnGuest: View = view.findViewById(R.id.btnGuest)
         val btnShowSignUp: View = view.findViewById(R.id.btnShowSignUp)
-        val btnShowLogin: View = view.findViewById(R.id.btnShowLogin) // Or tvShowLogin/tvLoginOption depending on your XML
+        val btnShowLogin: View = view.findViewById(R.id.btnShowLogin)
         val tvBackFromSignUp: View = view.findViewById(R.id.tvBackFromSignUp)
         val tvBackFromLogin: View = view.findViewById(R.id.tvBackFromLogin)
         val btnConfirmSignUp: View = view.findViewById(R.id.btnConfirmSignUp)
@@ -59,7 +62,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
 
         // =================================================================
-        // 3. OBSERVE STATE (Fixes "Unresolved reference: observe/LoginSuccess")
+        // 3. OBSERVE STATE
         // =================================================================
         viewModel.authState.observe(viewLifecycleOwner) { state ->
             when (state) {
@@ -87,7 +90,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         // =================================================================
-        // 4. CLICK LISTENERS (Now using the variables defined in Step 1)
+        // 4. CLICK LISTENERS
         // =================================================================
 
         // GUEST
@@ -135,21 +138,55 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         // =================================================================
-        // 5. VIDEO BACKGROUND
+        // 5. VIDEO BACKGROUND (UPDATED)
         // =================================================================
         videoView = view.findViewById(R.id.videoViewBackground)
         val path = "android.resource://" + requireContext().packageName + "/" + R.raw.login_bg
         videoView.setVideoURI(Uri.parse(path))
+
         videoView.setOnPreparedListener { mediaPlayer ->
             mediaPlayer.isLooping = true
             mediaPlayer.setVolume(0f, 0f)
 
             val videoRatio = mediaPlayer.videoWidth / mediaPlayer.videoHeight.toFloat()
             val screenRatio = videoView.width / videoView.height.toFloat()
-            val scaleX = videoRatio / screenRatio
-            if (scaleX >= 1f) videoView.scaleX = scaleX else videoView.scaleY = 1f / scaleX
+
+            // 1. Calculate base scale to fill screen
+            var scale = if (screenRatio > videoRatio) {
+                screenRatio / videoRatio
+            } else {
+                videoRatio / screenRatio
+            }
+
+            // 2. DETECT LANDSCAPE: Reduce Zoom
+            val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
+            if (isLandscape) {
+                // Reduces the zoom to 85%.
+                // Change to 0.8f for smaller, or 0.9f for larger.
+                scale *= 0.02f
+            }
+
+            // 3. Apply Scale (Ensure it doesn't shrink smaller than original)
+            if (scale >= 1f) {
+                videoView.scaleX = scale
+                videoView.scaleY = scale
+            } else {
+                videoView.scaleX = 1f
+                videoView.scaleY = 1f
+            }
+
+            // Resume video position
+            if (currentVideoPosition > 0) {
+                videoView.seekTo(currentVideoPosition)
+            }
+            videoView.start()
         }
-        videoView.start()
+    }
+
+    // Save video position when screen rotates or app pauses
+    override fun onPause() {
+        super.onPause()
+        currentVideoPosition = videoView.currentPosition
     }
 
     override fun onResume() {

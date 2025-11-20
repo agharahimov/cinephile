@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <!-- 1. BACKGROUND: Semi-transparent Black (20% opacity) to make text readable -->
+    <solid android:color="#33000000" />
+
+    <!-- 2. ROUNDED CORNERS: Matches your buttons -->
+    <corners android:radius="30dp" />
+
+    <!-- 3. BORDER: Thin semi-transparent white line to define the shape -->
+    <stroke
+        android:width="1dp"
+        android:color="#80FFFFFF" />
+
+    <!-- 4. PADDING: Keeps text away from the edges -->
+    <padding
+        android:left="20dp"
+        android:right="20dp"
+        android:top="10dp"
+        android:bottom="10dp"/>
+</shape>
