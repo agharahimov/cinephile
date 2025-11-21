@@ -13,7 +13,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Splash Screen
+        // 1. Splash Screen
         val splashScreen = installSplashScreen()
         var keepSplashOnScreen = true
         splashScreen.setKeepOnScreenCondition { keepSplashOnScreen }
@@ -22,29 +22,29 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Navigation Setup
+        // 2. Navigation Setup
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         val navController = navHostFragment.navController
         val bottomNav = findViewById<BottomNavigationView>(R.id.bottom_navigation)
+
+        // Connect Bottom Bar to Controller
         bottomNav.setupWithNavController(navController)
 
-        // VISIBILITY LOGIC
+        // 3. VISIBILITY LOGIC
+        // We hide the bar on Login, but show it on Home, Search, Watchlist, etc.
         navController.addOnDestinationChangedListener { _, destination, _ ->
-            if (destination.id == R.id.loginFragment) {
-                // --- LOGIN SCREEN ---
-                // 1. Hide Bottom Bar
-                bottomNav.visibility = View.GONE
-
-                // 2. Hide Status Bar (Battery/Time) for Immersion
-                window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-            } else {
-                // --- HOME SCREEN ---
-                // 1. Show Bottom Bar
-                bottomNav.visibility = View.VISIBLE
-
-                // 2. Show Status Bar
-                window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+            when (destination.id) {
+                R.id.loginFragment -> {
+                    // --- LOGIN SCREEN ---
+                    bottomNav.visibility = View.GONE
+                    window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+                }
+                else -> {
+                    // --- MAIN APP (Home, Search, Watchlist, etc.) ---
+                    bottomNav.visibility = View.VISIBLE
+                    window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+                }
             }
         }
     }

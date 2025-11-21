@@ -3,30 +3,55 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment"> <!-- App starts at Login -->
+    app:startDestination="@id/loginFragment">
 
-    <!-- 1. LOGIN FRAGMENT -->
+    <!-- 1. LOGIN SCREEN -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.cinephile.LoginFragment"
         android:label="Login"
         tools:layout="@layout/fragment_login">
 
-        <!-- Action to move to Home -->
+        <!-- THIS ACTION FIXES YOUR ERROR -->
+        <!-- It allows navigation from Login -> Home -->
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
-        <!-- popUpToInclusive="true" means: If user presses Back on Home,
-             it exits the app instead of going back to Login -->
     </fragment>
 
-    <!-- 2. HOME FRAGMENT -->
+    <!-- 2. HOME SCREEN (New Main Screen) -->
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.cinephile.HomeFragment"
+        android:name="com.example.cinephile.ui.HomeFragment"
         android:label="Home"
         tools:layout="@layout/fragment_home" />
+
+    <!-- 3. SEARCH SCREEN -->
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.cinephile.ui.search.SearchFragment"
+        android:label="Search"
+        tools:layout="@layout/fragment_search" />
+
+    <!-- 4. WATCHLIST SCREEN -->
+    <!-- Ensure you have created WatchlistFragment.kt or the app will crash when clicking this tab -->
+    <fragment
+        android:id="@+id/watchlistFragment"
+        android:name="com.example.cinephile.WatchlistFragment"
+        android:label="Watchlist" />
+
+    <!-- 5. QUIZ SCREEN -->
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.example.cinephile.QuizFragment"
+        android:label="Quiz" />
+
+    <!-- 6. RECOMMENDATION SCREEN -->
+    <fragment
+        android:id="@+id/recommendationFragment"
+        android:name="com.example.cinephile.RecommendationFragment"
+        android:label="Recommendations" />
 
 </navigation>
