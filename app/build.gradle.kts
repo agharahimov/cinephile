@@ -1,3 +1,14 @@
+import java.util.Properties
+
+// 1. Create a new Properties object
+val localProperties = Properties()
+// 2. Find the root project's 'local.properties' file
+val localPropertiesFile = rootProject.file("local.properties")
+// 3. If the file exists, load its contents
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -16,7 +27,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "TMDB_API_KEY", "\"${project.findProperty("TMDB_API_KEY")}\"")
+        buildConfigField("String", "TMDB_API_KEY", "\"${localProperties.getProperty("TMDB_API_KEY")}\"")
     }
 
     buildTypes {
