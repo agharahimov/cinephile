@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 // The constructor parameter is named "movieRepository". This is correct.
-class SearchViewModel(private val movieRepository: MovieRepository) : ViewModel() {
+class   SearchViewModel(private val movieRepository: MovieRepository) : ViewModel() {
 
     // CORRECTED: The StateFlow now correctly holds a SearchUiState object.
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
@@ -18,7 +18,7 @@ class SearchViewModel(private val movieRepository: MovieRepository) : ViewModel(
 
     private var searchJob: Job? = null
 
-    fun searchMovies(query: String) {
+    fun searchMovies(query: String, searchType: SearchType = SearchType.TITLE) {
         // Cancel any previous search job
         searchJob?.cancel()
 

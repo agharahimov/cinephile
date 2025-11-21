@@ -6,11 +6,11 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
 import com.example.cinephile.ui.ViewModelFactory
+import com.google.android.material.chip.ChipGroup // Import ChipGroup
 import kotlinx.coroutines.launch
 
 class SearchFragment : Fragment(R.layout.fragment_search) {
@@ -21,7 +21,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. INIT VIEWMODEL (Using teammate's updated Factory)
+        // 1. INIT VIEWMODEL
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(this, factory)[SearchViewModel::class.java]
 
@@ -32,24 +32,23 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val tvError = view.findViewById<TextView>(R.id.tvError)
         val rvMovies = view.findViewById<RecyclerView>(R.id.rvMovies)
 
-        // 3. SETUP RECYCLERVIEW (Grid Layout - 2 Columns)
+        // Find the ChipGroup for filters
+        val chipGroup = view.findViewById<ChipGroup>(R.id.chipGroupFilters)
+
+        // 3. SETUP RECYCLERVIEW
         movieAdapter = MovieAdapter(
             onMovieClick = { movie ->
-                // Navigate to Details Screen (Pass ID)
-                // val action = SearchFragmentDirections.actionSearchToDetails(movie.id)
-                // findNavController().navigate(action)
                 Toast.makeText(context, "Clicked: ${movie.title}", Toast.LENGTH_SHORT).show()
             },
             onMovieLongClick = { movie ->
-                // Add to Watchlist Logic
                 Toast.makeText(context, "Added to Watchlist: ${movie.title}", Toast.LENGTH_SHORT).show()
             }
         )
 
-        rvMovies.layoutManager = GridLayoutManager(context, 2) // 2 columns
+        rvMovies.layoutManager = GridLayoutManager(context, 2)
         rvMovies.adapter = movieAdapter
 
-        // 4. OBSERVE STATE (Using teammate's SearchUiState)
+        // 4. OBSERVE STATE
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
@@ -84,12 +83,43 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             }
         }
 
-        // 5. HANDLE SEARCH INPUT
+        // --- 5. FILTER LOGIC (UI UX) ---
+        // Change the hint text when user selects a different chip
+        chipGroup.setOnCheckedChangeListener { _, checkedId ->
+            etSearch.hint = when (checkedId) {
+                R.id.chipYear -> "Enter Year (e.g. 2023)"
+                R.id.chipDirector -> "Enter Director Name"
+                else -> "Search movies..."
+            }
+        }
+
+        // --- 6. HANDLE SEARCH CLICK ---
         btnSearch.setOnClickListener {
-            val query = etSearch.text.toString()
+            val query = etSearch.text.toString().trim() // Remove extra spaces
+
             if (query.isNotBlank()) {
-                viewModel.searchMovies(query)
-                // Hide keyboard if you have a utility for that
+
+                // Determine which Filter is active
+                val searchType = when (chipGroup.checkedChipId) {
+                    R.id.chipYear -> SearchType.YEAR
+                    R.id.chipGenre -> SearchType.GENRE
+                    R.id.chipDirector -> SearchType.DIRECTOR
+                    else -> SearchType.TITLE // Default to Title
+                }
+
+                // Specific Validation for YEAR
+                if (searchType == SearchType.YEAR) {
+                    // Check if query is exactly 4 numbers
+                    if (query.length != 4 || !query.all { it.isDigit() }) {
+                        Toast.makeText(context, "Please enter a valid 4-digit year", Toast.LENGTH_SHORT).show()
+                        return@setOnClickListener
+                    }
+                }
+
+                // Pass the Query AND the Type to the ViewModel
+                viewModel.searchMovies(query, searchType)
+
+                // Optional: Clear focus / hide keyboard could go here
             }
         }
     }
