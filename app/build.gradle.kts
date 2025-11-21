@@ -100,4 +100,5 @@ dependencies {
 
     // For testing the network layer
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
+    testImplementation(kotlin("test"))
 }

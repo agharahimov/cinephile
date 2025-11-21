@@ -13,23 +13,6 @@ interface MovieDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateMovie(movie: MovieEntity)
 
-    // A more specific insert for when we get a movie from the network
-    // It preserves the user's liked/watchlist status
-    @Transaction
-    suspend fun upsertMovie(movie: MovieEntity) {
-        val existingMovie = getMovieById(movie.id)
-        if (existingMovie != null) {
-            // If movie exists, preserve its flags and update the rest
-            insertOrUpdateMovie(movie.copy(
-                isInWatchlist = existingMovie.isInWatchlist,
-                isLiked = existingMovie.isLiked
-            ))
-        } else {
-            // If movie is new, just insert it
-            insertOrUpdateMovie(movie)
-        }
-    }
-
     @Query("SELECT * FROM movies WHERE id = :movieId")
     suspend fun getMovieById(movieId: Int): MovieEntity?
 
