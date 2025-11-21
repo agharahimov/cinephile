@@ -3,14 +3,16 @@ package com.example.cinephile.data
 import com.example.cinephile.BuildConfig
 import com.example.cinephile.data.remote.MovieDto
 import com.example.cinephile.data.remote.RetrofitClient
+import com.example.cinephile.data.remote.TmdbApiService
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.repository.MovieRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class MovieRepositoryImpl : MovieRepository {
+class MovieRepositoryImpl (
+    private val apiService: TmdbApiService = RetrofitClient.apiService
+        ) : MovieRepository {
 
-    private val apiService = RetrofitClient.apiService
     private val posterBaseUrl = "https://image.tmdb.org/t/p/w500"
 
     override suspend fun searchMovies(query: String): Result<List<Movie>> {

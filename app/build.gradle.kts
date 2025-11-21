@@ -86,4 +86,7 @@ dependencies {
 
     // Image Loading
     implementation("io.coil-kt:coil:2.6.0")
+
+    // For testing the network layer
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
