@@ -8,5 +8,7 @@ data class MovieEntity(
     @PrimaryKey val id: Int,
     val title: String,
     val posterPath: String?,
-    val releaseDate: String
+    val releaseDate: String,
+    val isInWatchlist: Boolean = false,
+    val isLiked: Boolean = false
 )

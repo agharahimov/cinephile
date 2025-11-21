@@ -5,10 +5,21 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [UserEntity::class], version = 1, exportSchema = false)
+@Database(
+    entities = [
+        UserEntity::class,
+        MovieEntity::class, // Your existing entity is now augmented
+        UserListEntity::class,
+        UserListMovieCrossRef::class
+    ],
+    version = 2, // IMPORTANT: We have changed the MovieEntity, so we MUST increment the version number.
+    exportSchema = false
+)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun userDao(): UserDao
+    abstract fun movieDao(): MovieDao
+    abstract fun userListDao(): UserListDao
 
     // SINGLETON PATTERN: Ensures only one database instance exists
     companion object {
@@ -21,7 +32,9 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "cinephile_db"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }
