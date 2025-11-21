@@ -12,16 +12,13 @@
         android:title="Search" />
 
     <item
-        android:id="@+id/watchlistFragment"
-        android:icon="@android:drawable/ic_menu_view"
-        android:title="Watchlist" />
-
-    <!-- Tab 3: Quiz -->
-    <item
         android:id="@+id/quizFragment"
         android:icon="@android:drawable/ic_menu_help"
         android:title="Quiz" />
 
-
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Profile" />
 
 </menu>
