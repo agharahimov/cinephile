@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/black"
+    android:padding="24dp">
+
+    <!-- TITLE (I Added the ID here so Kotlin can find it) -->
+    <TextView
+        android:id="@+id/tvProfileTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="My Profile"
+        android:textColor="@android:color/white"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="48dp"/>
+
+    <!-- 1. WATCHLIST BUTTON -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGoToWatchlist"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="My Watchlist"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center_vertical|start"
+        android:paddingStart="24dp"
+        app:icon="@android:drawable/ic_menu_view"
+        app:iconGravity="textStart"
+        app:iconPadding="16dp"
+        app:iconTint="@color/white"
+        app:cornerRadius="16dp"
+        android:backgroundTint="#1E1E1E"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- 2. SETTINGS BUTTON -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGoToSettings"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="Settings"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center_vertical|start"
+        android:paddingStart="24dp"
+        app:icon="@android:drawable/ic_menu_preferences"
+        app:iconGravity="textStart"
+        app:iconPadding="16dp"
+        app:iconTint="@color/white"
+        app:cornerRadius="16dp"
+        android:backgroundTint="#1E1E1E" />
+
+</LinearLayout>

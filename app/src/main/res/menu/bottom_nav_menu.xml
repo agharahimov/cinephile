@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/homeFragment"
+        android:icon="@android:drawable/ic_menu_compass"
+        android:title="Home" />
+
     <item
         android:id="@+id/searchFragment"
         android:icon="@android:drawable/ic_menu_search"
         android:title="Search" />
-    <!-- Add other menu items for Watchlist, Quiz, etc. later -->
+
+    <item
+        android:id="@+id/quizFragment"
+        android:icon="@android:drawable/ic_menu_help"
+        android:title="Quiz" />
+
+    <item
+        android:id="@+id/profileFragment"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Profile" />
+
 </menu>

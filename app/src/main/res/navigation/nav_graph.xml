@@ -3,30 +3,63 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/loginFragment"> <!-- App starts at Login -->
+    app:startDestination="@id/loginFragment">
 
-    <!-- 1. LOGIN FRAGMENT -->
+    <!-- 1. LOGIN -->
     <fragment
         android:id="@+id/loginFragment"
         android:name="com.example.cinephile.LoginFragment"
-        android:label="Login"
-        tools:layout="@layout/fragment_login">
-
-        <!-- Action to move to Home -->
+        android:label="Login">
         <action
             android:id="@+id/action_loginFragment_to_homeFragment"
             app:destination="@id/homeFragment"
             app:popUpTo="@id/loginFragment"
             app:popUpToInclusive="true" />
-        <!-- popUpToInclusive="true" means: If user presses Back on Home,
-             it exits the app instead of going back to Login -->
     </fragment>
 
-    <!-- 2. HOME FRAGMENT -->
+    <!-- 2. MAIN TABS -->
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.cinephile.HomeFragment"
-        android:label="Home"
-        tools:layout="@layout/fragment_home" />
+        android:name="com.example.cinephile.ui.HomeFragment"
+        android:label="Home" />
+
+    <fragment
+        android:id="@+id/searchFragment"
+        android:name="com.example.cinephile.ui.search.SearchFragment"
+        android:label="Search" />
+
+    <fragment
+        android:id="@+id/quizFragment"
+        android:name="com.example.cinephile.QuizFragment"
+        android:label="Quiz" />
+
+    <!-- 3. PROFILE TAB (Contains link to Watchlist) -->
+    <fragment
+        android:id="@+id/profileFragment"
+        android:name="com.example.cinephile.ProfileFragment"
+        android:label="Profile">
+
+        <!-- Action to open Watchlist -->
+        <action
+            android:id="@+id/action_profileFragment_to_watchlistFragment"
+            app:destination="@id/watchlistFragment" />
+
+        <!-- Action to open Settings (Optional) -->
+        <action
+            android:id="@+id/action_profileFragment_to_settingsFragment"
+            app:destination="@id/settingsFragment" />
+    </fragment>
+
+    <!-- 4. SUB-SCREENS (Not on bottom bar) -->
+    <fragment
+        android:id="@+id/watchlistFragment"
+        android:name="com.example.cinephile.WatchlistFragment"
+        android:label="My Watchlist"
+        tools:layout="@layout/fragment_watchlist" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.example.cinephile.SettingsFragment"
+        android:label="Settings" />
 
 </navigation>

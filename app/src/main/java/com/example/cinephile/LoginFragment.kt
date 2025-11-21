@@ -1,5 +1,6 @@
 package com.example.cinephile
 
+import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
@@ -56,12 +57,10 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         // =================================================================
         // 2. SETUP VIEWMODEL
         // =================================================================
-        // 1. Get the application context to avoid memory leaks.
         val applicationContext = requireActivity().applicationContext
-        // 2. Create the factory, passing in the context it now expects.
         val factory = ViewModelFactory(applicationContext)
-        // 3. Let the factory do all the work of creating the ViewModel.
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
+
         // =================================================================
         // 3. OBSERVE STATE
         // =================================================================
@@ -71,7 +70,15 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                     // Optional: Show loading spinner
                 }
                 is AuthState.LoginSuccess -> {
-                    Toast.makeText(context, "Welcome back!", Toast.LENGTH_SHORT).show()
+                    // --- SAVE USERNAME LOGIC ---
+                    val username = state.user.username
+                    val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+                    with(sharedPref.edit()) {
+                        putString("KEY_USERNAME", username)
+                        apply() // Save to memory
+                    }
+
+                    Toast.makeText(context, "Welcome back, $username!", Toast.LENGTH_SHORT).show()
                     findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
                     viewModel.resetState()
                 }
@@ -96,6 +103,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
         // GUEST
         btnGuest.setOnClickListener {
+            // Save "Guest" as the name
+            val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+            with(sharedPref.edit()) {
+                putString("KEY_USERNAME", "Guest")
+                apply()
+            }
             findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
         }
 
@@ -139,7 +152,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         }
 
         // =================================================================
-        // 5. VIDEO BACKGROUND (UPDATED)
+        // 5. VIDEO BACKGROUND
         // =================================================================
         videoView = view.findViewById(R.id.videoViewBackground)
         val path = "android.resource://" + requireContext().packageName + "/" + R.raw.login_bg
@@ -162,9 +175,8 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
             // 2. DETECT LANDSCAPE: Reduce Zoom
             val isLandscape = resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE
             if (isLandscape) {
-                // Reduces the zoom to 85%.
-                // Change to 0.8f for smaller, or 0.9f for larger.
-                scale *= 0.02f
+                // Reduces the zoom slightly so it's not too close
+                scale *= 0.85f
             }
 
             // 3. Apply Scale (Ensure it doesn't shrink smaller than original)
