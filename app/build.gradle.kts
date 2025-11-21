@@ -1,3 +1,14 @@
+import java.util.Properties
+
+// 1. Create a new Properties object
+val localProperties = Properties()
+// 2. Find the root project's 'local.properties' file
+val localPropertiesFile = rootProject.file("local.properties")
+// 3. If the file exists, load its contents
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
+}
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -16,6 +27,7 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        buildConfigField("String", "TMDB_API_KEY", "\"${localProperties.getProperty("TMDB_API_KEY")}\"")
     }
 
     buildTypes {
@@ -27,6 +39,11 @@ android {
             )
         }
     }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -77,4 +94,10 @@ dependencies {
     // Instrumented Testing
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
+
+    // Image Loading
+    implementation("io.coil-kt:coil:2.6.0")
+
+    // For testing the network layer
+    testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
 }
