@@ -1,27 +1,79 @@
 package com.example.cinephile.ui.search
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
+import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.repository.MovieRepository
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
-import org.junit.Assert.assertTrue
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.*
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 
-class SearchViewModel(private val repository: MovieRepository) : ViewModel() {
+@ExperimentalCoroutinesApi
+class SearchViewModelTest {
 
-    private val _uiState = MutableStateFlow<List<Movie>>(emptyList())
-    val uiState: StateFlow<List<Movie>> = _uiState
+    @get:Rule
+    val instantExecutorRule = InstantTaskExecutorRule()
 
-    fun searchMovies(query: String) {
-        viewModelScope.launch {
-            val result = repository.searchMovies(query)
-            result.onSuccess { movies ->
-                _uiState.value = movies
-            }
-            // TODO: Handle result.onFailure in a future task
-        }
+    private lateinit var viewModel: SearchViewModel
+    private lateinit var mockMovieRepository: MovieRepository
+    private val testDispatcher = StandardTestDispatcher()
+
+    @Before
+    fun setUp() {
+        Dispatchers.setMain(testDispatcher)
+        mockMovieRepository = mock()
+        viewModel = SearchViewModel(mockMovieRepository)
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
+    }
+
+    @Test
+    fun `searchMovies with valid query success should update state to Success`() = runTest {
+        // Arrange
+        val query = "Inception"
+        val fakeMovies = listOf(
+            Movie(1, "Inception", "url1", "overview1", "2010")
+        )
+        whenever(mockMovieRepository.searchMovies(query)).thenReturn(Result.success(fakeMovies))
+
+        // Act
+        viewModel.searchMovies(query)
+        testDispatcher.scheduler.advanceUntilIdle() // Execute the coroutine
+
+        // Assert
+        verify(mockMovieRepository).searchMovies(query) // Ensure the repository was called
+        val uiState = viewModel.uiState.value
+        assertTrue("UI State should be Success", uiState is SearchUiState.Success)
+        assertEquals(fakeMovies, (uiState as SearchUiState.Success).movies)
+    }
+
+    @Test
+    fun `searchMovies failure should update state to Error`() = runTest {
+        // Arrange
+        val query = "FailureQuery"
+        val errorMessage = "Network Error"
+        whenever(mockMovieRepository.searchMovies(query)).thenReturn(Result.failure(Exception(errorMessage)))
+
+        // Act
+        viewModel.searchMovies(query)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Assert
+        val uiState = viewModel.uiState.value
+        assertTrue("UI State should be Error", uiState is SearchUiState.Error)
+        assertEquals(errorMessage, (uiState as SearchUiState.Error).message)
     }
 }

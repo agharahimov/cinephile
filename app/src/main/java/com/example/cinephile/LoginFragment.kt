@@ -56,11 +56,12 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         // =================================================================
         // 2. SETUP VIEWMODEL
         // =================================================================
-        val db = AppDatabase.getDatabase(requireContext())
-        val repository = UserRepositoryImpl(db.userDao())
-        val factory = ViewModelFactory(repository)
+        // 1. Get the application context to avoid memory leaks.
+        val applicationContext = requireActivity().applicationContext
+        // 2. Create the factory, passing in the context it now expects.
+        val factory = ViewModelFactory(applicationContext)
+        // 3. Let the factory do all the work of creating the ViewModel.
         viewModel = ViewModelProvider(this, factory)[AuthViewModel::class.java]
-
         // =================================================================
         // 3. OBSERVE STATE
         // =================================================================
