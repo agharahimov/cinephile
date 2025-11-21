@@ -8,6 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import coil.load // <--- IMPORTANT: Make sure this import is here
 import com.example.cinephile.R
 import com.example.cinephile.domain.model.Movie
 
@@ -34,17 +35,22 @@ class MovieAdapter(
 
         fun bind(movie: Movie, onClick: (Movie) -> Unit, onLongClick: (Movie) -> Unit) {
             tvTitle.text = movie.title
-            // Assuming your Movie model has releaseDate or similar
-            tvInfo.text = "${movie.releaseDate}"
+            // Take first 4 characters of date (e.g., "2024-05-01" -> "2024")
+            tvInfo.text = movie.releaseDate.take(4)
 
-            // Note: In a real app, use a library like Glide or Coil here
-            // Glide.with(itemView).load(movie.posterUrl).into(ivPoster)
-            ivPoster.setImageResource(android.R.drawable.ic_menu_gallery) // Placeholder
+            // --- FIX: USE COIL TO LOAD IMAGE ---
+            ivPoster.load(movie.posterUrl) {
+                crossfade(true)
+                // Show Gray Mountain while downloading
+                placeholder(android.R.drawable.ic_menu_gallery)
+                // Show Red Alert Icon if download fails (wrong URL or no internet)
+                error(android.R.drawable.ic_menu_report_image)
+            }
 
             itemView.setOnClickListener { onClick(movie) }
             itemView.setOnLongClickListener {
                 onLongClick(movie)
-                true // Return true to indicate the click was handled
+                true
             }
         }
     }
