@@ -6,11 +6,12 @@ import android.widget.*
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController // Required for navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
 import com.example.cinephile.ui.ViewModelFactory
-import com.google.android.material.chip.ChipGroup // Import ChipGroup
+import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.launch
 
 class SearchFragment : Fragment(R.layout.fragment_search) {
@@ -31,17 +32,19 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
         val tvError = view.findViewById<TextView>(R.id.tvError)
         val rvMovies = view.findViewById<RecyclerView>(R.id.rvMovies)
-
-        // Find the ChipGroup for filters
         val chipGroup = view.findViewById<ChipGroup>(R.id.chipGroupFilters)
 
         // 3. SETUP RECYCLERVIEW
         movieAdapter = MovieAdapter(
             onMovieClick = { movie ->
-                Toast.makeText(context, "Clicked: ${movie.title}", Toast.LENGTH_SHORT).show()
+                // --- NAVIGATION LOGIC ADDED HERE ---
+                val bundle = Bundle().apply { putInt("movieId", movie.id) }
+                // Use the global action to jump to details from anywhere
+                findNavController().navigate(R.id.action_global_detailsFragment, bundle)
             },
             onMovieLongClick = { movie ->
-                Toast.makeText(context, "Added to Watchlist: ${movie.title}", Toast.LENGTH_SHORT).show()
+                // For now, keep the Toast. You can implement the actual DB call later via ViewModel.
+                Toast.makeText(context, "Long pressed: ${movie.title}", Toast.LENGTH_SHORT).show()
             }
         )
 
@@ -83,8 +86,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             }
         }
 
-        // --- 5. FILTER LOGIC (UI UX) ---
-        // Change the hint text when user selects a different chip
+        // 5. FILTER LOGIC (UI UX)
         chipGroup.setOnCheckedChangeListener { _, checkedId ->
             etSearch.hint = when (checkedId) {
                 R.id.chipYear -> "Enter Year (e.g. 2023)"
@@ -93,33 +95,31 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             }
         }
 
-        // --- 6. HANDLE SEARCH CLICK ---
+        // 6. HANDLE SEARCH CLICK
         btnSearch.setOnClickListener {
-            val query = etSearch.text.toString().trim() // Remove extra spaces
+            val query = etSearch.text.toString().trim()
 
             if (query.isNotBlank()) {
-
                 // Determine which Filter is active
                 val searchType = when (chipGroup.checkedChipId) {
                     R.id.chipYear -> SearchType.YEAR
                     R.id.chipGenre -> SearchType.GENRE
                     R.id.chipDirector -> SearchType.DIRECTOR
-                    else -> SearchType.TITLE // Default to Title
+                    else -> SearchType.TITLE
                 }
 
-                // Specific Validation for YEAR
+                // Validation for YEAR
                 if (searchType == SearchType.YEAR) {
-                    // Check if query is exactly 4 numbers
                     if (query.length != 4 || !query.all { it.isDigit() }) {
                         Toast.makeText(context, "Please enter a valid 4-digit year", Toast.LENGTH_SHORT).show()
                         return@setOnClickListener
                     }
                 }
 
-                // Pass the Query AND the Type to the ViewModel
+                // Pass Query AND Type to ViewModel
                 viewModel.searchMovies(query, searchType)
 
-                // Optional: Clear focus / hide keyboard could go here
+                // Optional: Hide keyboard here
             }
         }
     }

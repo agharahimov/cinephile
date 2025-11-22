@@ -83,4 +83,34 @@ class MovieRepositoryImpl(
             rating = this.voteAverage ?: 0.0
         )
     }
+    override suspend fun getMovieDetails(movieId: Int): Result<Movie> {
+        return try {
+            // 1. Call API for Details
+            val details = apiService.getMovieDetails(movieId, API_KEY)
+
+            // 2. Call API for Director/Cast
+            val credits = apiService.getMovieCredits(movieId, API_KEY)
+
+            // 3. Extract Director
+            val director = credits.crew.find { it.job == "Director" }?.name ?: "Unknown"
+
+            // 4. Extract Cast (Top 3)
+            val cast = credits.cast.take(3).joinToString(", ") { it.name }
+
+            // 5. Convert to Domain Movie
+            val movie = Movie(
+                id = details.id,
+                title = details.title,
+                posterUrl = "https://image.tmdb.org/t/p/w500${details.posterPath}",
+                // We combine the overview with the extra info for now
+                overview = "${details.overview}\n\nDirector: $director\nCast: $cast",
+                releaseDate = details.releaseDate ?: "",
+                rating = details.voteAverage ?: 0.0
+            )
+            Result.success(movie)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Result.failure(e)
+        }
+    }
 }

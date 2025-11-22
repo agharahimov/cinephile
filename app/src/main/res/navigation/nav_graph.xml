@@ -20,7 +20,7 @@
     <!-- 2. MAIN TABS -->
     <fragment
         android:id="@+id/homeFragment"
-        android:name="com.example.cinephile.ui.HomeFragment"
+        android:name="com.example.cinephile.ui.home.HomeFragment"
         android:label="Home" />
 
     <fragment
@@ -30,7 +30,7 @@
 
     <fragment
         android:id="@+id/quizFragment"
-        android:name="com.example.cinephile.QuizFragment"
+        android:name="com.example.cinephile.ui.quiz.QuizFragment"
         android:label="Quiz" />
 
     <!-- 3. PROFILE TAB (Contains link to Watchlist) -->
@@ -53,7 +53,7 @@
     <!-- 4. SUB-SCREENS (Not on bottom bar) -->
     <fragment
         android:id="@+id/watchlistFragment"
-        android:name="com.example.cinephile.WatchlistFragment"
+        android:name="com.example.cinephile.ui.watchlist.WatchlistFragment"
         android:label="My Watchlist"
         tools:layout="@layout/fragment_watchlist" />
 
@@ -61,5 +61,22 @@
         android:id="@+id/settingsFragment"
         android:name="com.example.cinephile.SettingsFragment"
         android:label="Settings" />
+    <!-- 1. DETAILS SCREEN (New) -->
+    <fragment
+        android:id="@+id/detailsFragment"
+        android:name="com.example.cinephile.ui.details.DetailsFragment"
+        android:label="Movie Details"
+        tools:layout="@layout/fragment_details">
 
+        <!-- It requires an ID to know which movie to load -->
+        <argument
+            android:name="movieId"
+            app:argType="integer"
+            android:defaultValue="0" />
+    </fragment>
+
+    <!-- 2. GLOBAL ACTION (Allows navigation from ANY screen) -->
+    <action
+        android:id="@+id/action_global_detailsFragment"
+        app:destination="@id/detailsFragment" />
 </navigation>

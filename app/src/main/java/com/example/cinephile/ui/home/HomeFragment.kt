@@ -1,4 +1,4 @@
-package com.example.cinephile.ui
+package com.example.cinephile.ui.home
 
 import android.os.Bundle
 import android.view.View
@@ -10,8 +10,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
-import com.example.cinephile.ui.home.HomeUiState
-import com.example.cinephile.ui.home.HomeViewModel
+import com.example.cinephile.ui.ViewModelFactory
 import com.example.cinephile.ui.search.MovieAdapter
 import kotlinx.coroutines.launch
 
@@ -40,7 +39,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // 2. Setup Trending List (Horizontal)
         trendingAdapter = MovieAdapter(
-            onMovieClick = { movie -> Toast.makeText(context, movie.title, Toast.LENGTH_SHORT).show() },
+            onMovieClick = { movie ->
+                Toast.makeText(context, movie.title, Toast.LENGTH_SHORT).show()
+            },
             onMovieLongClick = { }
         )
 
@@ -52,7 +53,9 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         // 3. Setup Recommendation List (Horizontal)
         recommendationAdapter = MovieAdapter(
-            onMovieClick = { movie -> Toast.makeText(context, movie.title, Toast.LENGTH_SHORT).show() },
+            onMovieClick = { movie ->
+                Toast.makeText(context, movie.title, Toast.LENGTH_SHORT).show()
+            },
             onMovieLongClick = { }
         )
 

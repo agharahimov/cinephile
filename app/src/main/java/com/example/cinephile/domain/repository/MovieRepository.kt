@@ -12,4 +12,5 @@ interface MovieRepository {
 
     // 3. Recommendations (Placeholder)
     suspend fun getRecommendedMovies(userId: Int): Result<List<Movie>>
+    suspend fun getMovieDetails(movieId: Int): Result<Movie>
 }
