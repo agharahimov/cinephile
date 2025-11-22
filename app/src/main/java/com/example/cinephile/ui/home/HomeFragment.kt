@@ -7,10 +7,13 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController // <--- IMPORT THIS
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
 import com.example.cinephile.ui.ViewModelFactory
+import com.example.cinephile.ui.home.HomeUiState
+import com.example.cinephile.ui.home.HomeViewModel
 import com.example.cinephile.ui.search.MovieAdapter
 import kotlinx.coroutines.launch
 
@@ -20,7 +23,6 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var trendingAdapter: MovieAdapter
     private lateinit var recommendationAdapter: MovieAdapter
 
-    // --- FIX: Declare UI variables here so they are seen by the whole class ---
     private lateinit var rvTrending: RecyclerView
     private lateinit var rvRecommendations: RecyclerView
     private lateinit var pbTrending: ProgressBar
@@ -28,49 +30,55 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // --- FIX: Initialize them using findViewById ---
+        // 1. Variables
         rvTrending = view.findViewById(R.id.rvTrending)
         rvRecommendations = view.findViewById(R.id.rvRecommendations)
-        pbTrending = view.findViewById(R.id.progressBar) // Note: In XML it's likely @+id/progressBar
+        pbTrending = view.findViewById(R.id.progressBar)
 
-        // 1. Setup ViewModel
+        // 2. ViewModel
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
 
-        // 2. Setup Trending List (Horizontal)
+        // ==============================================================
+        // 3. SETUP ADAPTERS (UPDATED CLICK LOGIC)
+        // ==============================================================
+
+        // --- TRENDING LIST ---
         trendingAdapter = MovieAdapter(
             onMovieClick = { movie ->
-                Toast.makeText(context, movie.title, Toast.LENGTH_SHORT).show()
+                // OPEN DETAILS SCREEN
+                openMovieDetails(movie.id)
             },
-            onMovieLongClick = { }
+            onMovieLongClick = { movie ->
+                // Use requireContext() instead of context
+                Toast.makeText(requireContext(), "Long press: ${movie.title}", Toast.LENGTH_SHORT).show()
+            }
         )
 
-        // Now 'rvTrending' is recognized!
         rvTrending.apply {
             adapter = trendingAdapter
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
-        // 3. Setup Recommendation List (Horizontal)
+        // --- RECOMMENDATION LIST ---
         recommendationAdapter = MovieAdapter(
             onMovieClick = { movie ->
-                Toast.makeText(context, movie.title, Toast.LENGTH_SHORT).show()
+                // OPEN DETAILS SCREEN
+                openMovieDetails(movie.id)
             },
             onMovieLongClick = { }
         )
 
-        // Now 'rvRecommendations' is recognized!
         rvRecommendations.apply {
             adapter = recommendationAdapter
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
-        // 4. Observe Data
+        // 4. Observe Data (Same as before)
         lifecycleScope.launch {
             viewModel.trendingState.collect { state ->
                 if (state is HomeUiState.Success) {
                     trendingAdapter.submitList(state.movies)
-                    // Now 'pbTrending' is recognized!
                     pbTrending.visibility = View.GONE
                 }
             }
@@ -83,5 +91,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 }
             }
         }
+    }
+
+    // --- HELPER FUNCTION TO NAVIGATE ---
+    private fun openMovieDetails(movieId: Int) {
+        val bundle = Bundle().apply {
+            putInt("movieId", movieId)
+        }
+        // Navigate using the Global Action we defined in nav_graph.xml
+        findNavController().navigate(R.id.action_global_detailsFragment, bundle)
     }
 }

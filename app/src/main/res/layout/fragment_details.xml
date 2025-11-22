@@ -1,148 +1,177 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black"
-    android:fillViewport="true">
+    android:background="@color/black">
 
-    <LinearLayout
+    <!-- 1. SCROLLABLE CONTENT -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scrollView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="32dp">
+        android:layout_height="0dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bottomActionContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
-        <!-- HEADER IMAGE CONTAINER -->
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <!-- Large Poster -->
-            <ImageView
-                android:id="@+id/ivDetailPoster"
-                android:layout_width="match_parent"
-                android:layout_height="450dp"
-                android:scaleType="centerCrop"
-                android:src="@android:drawable/ic_menu_gallery"/>
-
-            <!-- Dark Gradient at bottom for text -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="450dp"
-                android:background="#99000000" />
-
-            <!-- BACK BUTTON (Top Left) -->
-            <ImageButton
-                android:id="@+id/btnBack"
-                android:layout_width="48dp"
-                android:layout_height="48dp"
-                android:layout_margin="16dp"
-                android:src="@android:drawable/ic_menu_revert"
-                android:background="#80000000"
-                app:tint="@color/white"
-                android:padding="12dp"/>
-        </FrameLayout>
-
-        <!-- INFO SECTION -->
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:layout_marginTop="-60dp"> <!-- Pull text up over image -->
+            android:paddingBottom="32dp">
 
+            <!-- BACKDROP IMAGE (Top Header) -->
+            <ImageView
+                android:id="@+id/ivBackdrop"
+                android:layout_width="match_parent"
+                android:layout_height="250dp"
+                android:scaleType="centerCrop"
+                android:src="@android:drawable/ic_menu_gallery"
+                android:alpha="0.7"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <!-- Gradient to fade backdrop into black -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:background="@drawable/bg_gradient_black_bottom"
+                app:layout_constraintBottom_toBottomOf="@id/ivBackdrop" />
+
+            <!-- SMALL POSTER (Floating on Right) -->
+            <androidx.cardview.widget.CardView
+                android:id="@+id/cardPoster"
+                android:layout_width="100dp"
+                android:layout_height="150dp"
+                android:layout_marginEnd="24dp"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="8dp"
+                app:layout_constraintBottom_toBottomOf="@id/ivBackdrop"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivBackdrop">
+
+                <ImageView
+                    android:id="@+id/ivSmallPoster"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:src="@android:drawable/ic_menu_gallery" />
+            </androidx.cardview.widget.CardView>
+
+            <!-- TITLE (Left Side) -->
             <TextView
                 android:id="@+id/tvDetailTitle"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="Loading..."
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="16dp"
+                android:layout_marginTop="16dp"
+                android:text="Movie Title"
                 android:textColor="@color/white"
-                android:textSize="30sp"
-                android:textStyle="bold"/>
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintEnd_toStartOf="@id/cardPoster"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/ivBackdrop" />
 
+            <!-- YEAR / DIRECTOR -->
             <TextView
                 android:id="@+id/tvDetailDate"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2024"
-                android:textColor="#CCCCCC"
-                android:textSize="16sp"
-                android:layout_marginBottom="16dp"/>
+                android:text="2025 • Directed by..."
+                android:textColor="#BBBBBB"
+                android:textSize="14sp"
+                android:layout_marginTop="4dp"
+                app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
+                app:layout_constraintTop_toBottomOf="@id/tvDetailTitle" />
 
-            <!-- RATING SYSTEM -->
+            <!-- RATING (Small) -->
             <TextView
+                android:id="@+id/tvRatingText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Rating"
-                android:textColor="#888888"
-                android:textSize="12sp"/>
-
-            <RatingBar
-                android:id="@+id/ratingBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:numStars="5"
-                android:stepSize="0.5"
-                android:rating="0"
-                style="?android:attr/ratingBarStyleIndicator"
-                android:progressTint="#FFD700"
-                android:layout_marginBottom="24dp"/>
-
-            <!-- ACTION BUTTONS -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:weightSum="2"
-                android:layout_marginBottom="24dp">
-
-                <!-- Favorite -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnFavorite"
-                    android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:layout_weight="1"
-                    android:text="Favorite"
-                    android:layout_marginEnd="8dp"
-                    app:icon="@android:drawable/btn_star"
-                    app:iconTint="@color/white"
-                    app:backgroundTint="#333333"
-                    app:cornerRadius="12dp"/>
-
-                <!-- Watchlist -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnWatchlist"
-                    android:layout_width="0dp"
-                    android:layout_height="60dp"
-                    android:layout_weight="1"
-                    android:text="Watchlist"
-                    android:layout_marginStart="8dp"
-                    app:icon="@android:drawable/ic_input_add"
-                    app:iconTint="@color/white"
-                    app:backgroundTint="#6200EE"
-                    app:cornerRadius="12dp"/>
-            </LinearLayout>
-
-            <!-- SYNOPSIS -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Synopsis and Crew"
-                android:textColor="@color/white"
-                android:textSize="18sp"
+                android:text="TMDB: 7.8"
+                android:textColor="#FFD700"
+                android:textSize="12sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginTop="8dp"
+                app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
+                app:layout_constraintTop_toBottomOf="@id/tvDetailDate" />
 
+            <!-- SYNOPSIS (Tagline style) -->
             <TextView
                 android:id="@+id/tvDetailOverview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginStart="24dp"
+                android:layout_marginEnd="24dp"
                 android:text="..."
                 android:textColor="#DDDDDD"
-                android:lineSpacingExtra="4dp"
-                android:textSize="16sp"/>
+                android:lineSpacingExtra="6dp"
+                android:textSize="15sp"
+                app:layout_constraintTop_toBottomOf="@id/cardPoster" />
 
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
+
+    <!-- BACK BUTTON (Fixed Top Left & Transparent) -->
+    <ImageButton
+        android:id="@+id/btnBack"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_margin="16dp"
+        android:src="@android:drawable/ic_menu_revert"
+        android:background="@android:color/transparent"
+        app:tint="@color/white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <!-- BOTTOM TRIGGER BAR -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/bottomActionContainer"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="30dp"
+        app:cardBackgroundColor="#2C3440"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:orientation="horizontal">
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@drawable/app_icon_transparent"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Rate, log, review, add to list..."
+                android:textColor="#BBBBBB"
+                android:textSize="14sp"
+                android:layout_marginStart="12dp"/>
+
+            <ImageView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:src="@android:drawable/ic_menu_more"
+                app:tint="#BBBBBB"/>
         </LinearLayout>
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+    </androidx.cardview.widget.CardView>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
