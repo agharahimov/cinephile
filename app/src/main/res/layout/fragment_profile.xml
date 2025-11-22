@@ -12,12 +12,12 @@
         android:id="@+id/tvProfileTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="48dp"
         android:text="My Profile"
         android:textColor="@android:color/white"
         android:textSize="32sp"
-        android:textStyle="bold"
-        android:layout_marginTop="32dp"
-        android:layout_marginBottom="48dp"/>
+        android:textStyle="bold" />
 
     <!-- 1. WATCHLIST BUTTON -->
     <com.google.android.material.button.MaterialButton

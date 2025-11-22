@@ -1,4 +1,4 @@
-package com.example.cinephile
+package com.example.cinephile.ui.watchlist
 
 import android.app.AlertDialog
 import android.os.Bundle
@@ -11,10 +11,9 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.cinephile.R
 import com.example.cinephile.ui.ViewModelFactory
-import com.example.cinephile.ui.search.MovieAdapter // Reuse the adapter from Search
-import com.example.cinephile.ui.watchlist.WatchlistUiState
-import com.example.cinephile.ui.watchlist.WatchlistViewModel
+import com.example.cinephile.ui.search.MovieAdapter
 import kotlinx.coroutines.launch
 
 class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {

@@ -6,7 +6,52 @@
     android:layout_height="match_parent"
     android:background="@color/black">
 
-    <!-- 1. FRAGMENT CONTAINER (Takes up all space) -->
+    <!-- 1. TOP APP BAR -->
+    <!-- Increased height to 100dp for a BIG logo -->
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/black"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/topToolbar"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"> <!-- Changed from 80dp to 100dp -->
+
+            <!-- LOGO IMAGE -->
+            <!-- width=wrap_content and height=match_parent lets it grow naturally -->
+            <ImageView
+                android:id="@+id/ivToolbarLogo"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:adjustViewBounds="true"
+                android:padding="8dp"
+                android:scaleType="fitCenter"
+                android:scaleX="2.5"
+                android:scaleY="2.5"
+                android:src="@drawable/logo_white" />
+            <TextView
+                android:id="@+id/tvToolbarSubtitle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Welcome, Guest"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:visibility="gone"
+                android:layout_marginTop="0dp"/>
+            <!-- adjustViewBounds ensures width grows with height -->
+
+        </androidx.appcompat.widget.Toolbar>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <!-- 2. FRAGMENT CONTAINER -->
+    <!-- Constrained to bottom of AppBar so it doesn't overlap -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
         android:name="androidx.navigation.fragment.NavHostFragment"
@@ -14,19 +59,19 @@
         android:layout_height="0dp"
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph"
+        app:layout_constraintTop_toBottomOf="@id/appBarLayout"
         app:layout_constraintBottom_toTopOf="@id/bottom_navigation"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
-    <!-- 2. BOTTOM NAVIGATION -->
+    <!-- 3. BOTTOM NAVIGATION -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/black"
-        app:itemIconTint="@android:color/white"
-        app:itemTextColor="@android:color/white"
+        app:itemIconTint="@color/white"
+        app:itemTextColor="@color/white"
         app:menu="@menu/bottom_nav_menu"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
