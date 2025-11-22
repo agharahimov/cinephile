@@ -16,8 +16,9 @@ class MovieRepositoryImpl(
 
     private val API_KEY = BuildConfig.TMDB_API_KEY
     private val posterBaseUrl = "https://image.tmdb.org/t/p/w500"
+    private val backdropBaseUrl = "https://image.tmdb.org/t/p/w780" // Wider quality for backdrops
 
-    // 1. SEARCH (Updated logic)
+    // 1. SEARCH
     override suspend fun searchMovies(query: String, type: SearchType): Result<List<Movie>> {
         return withContext(Dispatchers.IO) {
             try {
@@ -71,18 +72,7 @@ class MovieRepositoryImpl(
         }
     }
 
-    // Helper Mapper
-    private fun MovieDto.toDomainModel(): Movie? {
-        if (this.posterPath == null) return null
-        return Movie(
-            id = this.id,
-            title = this.title,
-            posterUrl = "$posterBaseUrl${this.posterPath}",
-            overview = this.overview ?: "No overview available.",
-            releaseDate = this.releaseDate ?: "Unknown",
-            rating = this.voteAverage ?: 0.0
-        )
-    }
+    // 4. GET MOVIE DETAILS (Updated for Letterboxd Style)
     override suspend fun getMovieDetails(movieId: Int): Result<Movie> {
         return try {
             // 1. Call API for Details
@@ -101,7 +91,14 @@ class MovieRepositoryImpl(
             val movie = Movie(
                 id = details.id,
                 title = details.title,
-                posterUrl = "https://image.tmdb.org/t/p/w500${details.posterPath}",
+                posterUrl = "$posterBaseUrl${details.posterPath}",
+
+                // --- NEW: Map the Backdrop URL (Horizontal Image) ---
+                backdropUrl = if (details.backdropPath != null)
+                    "$backdropBaseUrl${details.backdropPath}"
+                else
+                    "$posterBaseUrl${details.posterPath}", // Fallback to poster if no backdrop
+
                 // We combine the overview with the extra info for now
                 overview = "${details.overview}\n\nDirector: $director\nCast: $cast",
                 releaseDate = details.releaseDate ?: "",
@@ -112,5 +109,25 @@ class MovieRepositoryImpl(
             e.printStackTrace()
             Result.failure(e)
         }
+    }
+
+    // Helper Mapper (Updated for Backdrop)
+    private fun MovieDto.toDomainModel(): Movie? {
+        if (this.posterPath == null) return null
+        return Movie(
+            id = this.id,
+            title = this.title,
+            posterUrl = "$posterBaseUrl${this.posterPath}",
+
+            // --- NEW: Map the Backdrop URL here too ---
+            backdropUrl = if (this.backdropPath != null)
+                "$backdropBaseUrl${this.backdropPath}"
+            else
+                "$posterBaseUrl${this.posterPath}",
+
+            overview = this.overview ?: "No overview available.",
+            releaseDate = this.releaseDate ?: "Unknown",
+            rating = this.voteAverage ?: 0.0
+        )
     }
 }

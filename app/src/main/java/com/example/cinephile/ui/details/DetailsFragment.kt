@@ -27,7 +27,6 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
         if (movieId != 0) viewModel.loadMovie(movieId)
 
         // --- 1. FIND THE NEW VIEWS (Updated IDs) ---
-        // We now have TWO images (Backdrop + Poster) instead of one
         val ivBackdrop = view.findViewById<ImageView>(R.id.ivBackdrop)
         val ivSmallPoster = view.findViewById<ImageView>(R.id.ivSmallPoster)
 
@@ -36,7 +35,6 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
         val tvOverview = view.findViewById<TextView>(R.id.tvDetailOverview)
         val btnBack = view.findViewById<View>(R.id.btnBack)
 
-        // We replaced the RatingBar with a Text View in the main layout
         val tvRating = view.findViewById<TextView>(R.id.tvRatingText)
 
         val bottomActionContainer = view.findViewById<View>(R.id.bottomActionContainer)
@@ -62,20 +60,24 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 state.movie?.let { movie ->
+
+                    // Text Updates
                     tvTitle.text = movie.title
                     tvDate.text = movie.releaseDate
                     tvOverview.text = movie.overview
-
-                    // Update the Text Rating (e.g. "TMDB: 7.8")
                     tvRating.text = "TMDB: ${String.format("%.1f", movie.rating)}"
 
-                    // Load the Backdrop (Top Image)
-                    ivBackdrop.load(movie.posterUrl) {
+                    // --- IMAGE LOADING FIX ---
+
+                    // 1. TOP IMAGE: Load 'backdropUrl' (Wide image)
+                    ivBackdrop.load(movie.backdropUrl) {
                         crossfade(true)
-                        // Optional: transformations(BlurTransformation(requireContext(), 15f))
+                        placeholder(android.R.drawable.ic_menu_gallery)
+                        // If no backdrop exists, you might want to set a color or error drawable
+                        error(android.R.color.darker_gray)
                     }
 
-                    // Load the Small Poster (Right Side)
+                    // 2. SIDE POSTER: Load 'posterUrl' (Tall image)
                     ivSmallPoster.load(movie.posterUrl) {
                         crossfade(true)
                     }
