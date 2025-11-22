@@ -47,7 +47,6 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Reconstruct Movie Object
         val args = arguments ?: return
         movieObj = Movie(
             id = args.getInt("id"),
@@ -60,14 +59,12 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
             director = ""
         )
 
-        // 2. Connect to Parent ViewModel (Shares state with DetailsFragment)
-        // This ensures we see the SAME data (Liked/Watchlisted) as the screen behind us
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(requireParentFragment(), factory)[DetailsViewModel::class.java]
-
-        // 3. UI References
-        val tvTitle = view.findViewById<TextView>(R.id.tvSheetTitle)
-        val tvYear = view.findViewById<TextView>(R.id.tvSheetYear)
+        viewModel.checkDatabaseStatus(movieObj.id)
+        // UI References
+        view.findViewById<TextView>(R.id.tvSheetTitle).text = movieObj.title
+        view.findViewById<TextView>(R.id.tvSheetYear).text = movieObj.releaseDate.take(4)
 
         val btnLike = view.findViewById<LinearLayout>(R.id.btnSheetLike)
         val ivLike = view.findViewById<ImageView>(R.id.ivSheetLike)
@@ -77,54 +74,50 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         val ivWatchlist = view.findViewById<ImageView>(R.id.ivSheetWatchlist)
         val tvWatchlist = view.findViewById<TextView>(R.id.tvSheetWatchlist)
 
-        // Set Static Data
-        tvTitle.text = movieObj.title
-        tvYear.text = movieObj.releaseDate.take(4)
-
-        // 4. OBSERVE STATE (The Fix)
-        // This runs immediately when sheet opens and checks if movie is already liked
+        // 4. OBSERVE STATE (This runs automatically when DB changes)
         lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
 
-                // --- UPDATE LIKE ICON ---
+                // --- UPDATE LIKE VISUALS ---
                 if (state.isFavorite) {
-                    ivLike.setImageResource(android.R.drawable.star_big_on) // Filled Star
-                    ivLike.imageTintList = ColorStateList.valueOf(Color.parseColor("#E91E63")) // Red
+                    // YELLOW / GOLD
+                    ivLike.setImageResource(android.R.drawable.star_big_on)
+                    ivLike.imageTintList = ColorStateList.valueOf(Color.parseColor("#FFD700"))
                     tvLike.text = "Liked"
-                    tvLike.setTextColor(Color.parseColor("#E91E63"))
+                    tvLike.setTextColor(Color.parseColor("#FFD700"))
                 } else {
-                    ivLike.setImageResource(android.R.drawable.btn_star) // Outline Star
-                    ivLike.imageTintList = ColorStateList.valueOf(Color.parseColor("#99AABB")) // Grey
+                    // GREY
+                    ivLike.setImageResource(android.R.drawable.btn_star)
+                    ivLike.imageTintList = ColorStateList.valueOf(Color.parseColor("#99AABB"))
                     tvLike.text = "Like"
                     tvLike.setTextColor(Color.parseColor("#99AABB"))
                 }
 
-                // --- UPDATE WATCHLIST ICON ---
+                // --- UPDATE WATCHLIST VISUALS ---
                 if (state.isInWatchlist) {
-                    ivWatchlist.setImageResource(android.R.drawable.checkbox_on_background) // Checkmark
-                    ivWatchlist.imageTintList = ColorStateList.valueOf(Color.parseColor("#03DAC5")) // Teal
-                    tvWatchlist.text = "Saved"
+                    // TEAL / TICK
+                    ivWatchlist.setImageResource(R.drawable.ic_check)
+                    ivWatchlist.imageTintList = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
+                    tvWatchlist.text = "Added"
                     tvWatchlist.setTextColor(Color.parseColor("#03DAC5"))
                 } else {
-                    ivWatchlist.setImageResource(android.R.drawable.ic_input_add) // Plus Sign
-                    ivWatchlist.imageTintList = ColorStateList.valueOf(Color.parseColor("#99AABB")) // Grey
+                    // GREY / PLUS
+                    ivWatchlist.setImageResource(android.R.drawable.ic_input_add)
+                    ivWatchlist.imageTintList = ColorStateList.valueOf(Color.parseColor("#99AABB"))
                     tvWatchlist.text = "Watchlist"
                     tvWatchlist.setTextColor(Color.parseColor("#99AABB"))
                 }
             }
         }
 
-        // 5. Click Listeners
+        // 5. CLICK LISTENERS
         btnLike.setOnClickListener {
             viewModel.toggleFavorite(movieObj)
-            // Don't dismiss, let user see the change
         }
 
         btnWatchlist.setOnClickListener {
             viewModel.toggleWatchlist(movieObj)
-            // Dismiss after adding to watchlist feels natural
-            dismiss()
-            Toast.makeText(context, "Watchlist Updated", Toast.LENGTH_SHORT).show()
+            // Removed 'dismiss()' so you can see the "Added" checkmark appear
         }
     }
 }

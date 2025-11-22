@@ -49,39 +49,44 @@ class DetailsViewModel(
     // Toggle Favorite logic
     // --- TOGGLE FAVORITE ---
     fun toggleFavorite(movie: Movie? = _uiState.value.movie) {
-        // 1. DEFINE 'targetMovie' HERE (This was missing)
         val targetMovie = movie ?: return
 
         viewModelScope.launch {
-            // 2. USE 'targetMovie'
             if (userRepo.isMovieLiked(targetMovie.id)) {
                 userRepo.unlikeMovie(targetMovie.id)
+                // Update State: It was true, now it's false
+                _uiState.value = _uiState.value.copy(isFavorite = false)
             } else {
                 userRepo.likeMovie(targetMovie)
+                // Update State: It was false, now it's true
+                _uiState.value = _uiState.value.copy(isFavorite = true)
             }
-
-            if (_uiState.value.movie?.id == targetMovie.id) {
-                _uiState.value = _uiState.value.copy(isFavorite = !_uiState.value.isFavorite)
-            }
+        }
+    }
+    fun checkDatabaseStatus(movieId: Int) {
+        viewModelScope.launch {
+            val isFav = userRepo.isMovieLiked(movieId)
+            val isWatch = userRepo.isMovieInWatchlist(movieId)
+            // Update UI State instantly
+            _uiState.value = _uiState.value.copy(isFavorite = isFav, isInWatchlist = isWatch)
         }
     }
 
     // Toggle Watchlist logic
     fun toggleWatchlist(movie: Movie? = _uiState.value.movie) {
-        // 1. DEFINE 'targetMovie' HERE
         val targetMovie = movie ?: return
 
         viewModelScope.launch {
-            // 2. USE 'targetMovie'
+            // 1. Database Operation
             if (userRepo.isMovieInWatchlist(targetMovie.id)) {
                 userRepo.removeMovieFromWatchlist(targetMovie.id)
             } else {
                 userRepo.addMovieToWatchlist(targetMovie)
             }
 
-            if (_uiState.value.movie?.id == targetMovie.id) {
-                _uiState.value = _uiState.value.copy(isInWatchlist = !_uiState.value.isInWatchlist)
-            }
+            // 2. ALWAYS update the UI state
+            // Removed: if (_uiState.value.movie?.id == targetMovie.id)
+            _uiState.value = _uiState.value.copy(isInWatchlist = !_uiState.value.isInWatchlist)
         }
     }
 }
