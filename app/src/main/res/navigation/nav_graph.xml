@@ -39,6 +39,7 @@
         android:name="com.example.cinephile.ProfileFragment"
         android:label="Profile">
 
+
         <!-- Action to open Watchlist -->
         <action
             android:id="@+id/action_profileFragment_to_watchlistFragment"
@@ -48,6 +49,9 @@
         <action
             android:id="@+id/action_profileFragment_to_settingsFragment"
             app:destination="@id/settingsFragment" />
+        <action
+            android:id="@+id/action_profileFragment_to_favoritesFragment"
+            app:destination="@id/favoritesFragment" />
     </fragment>
 
     <!-- 4. SUB-SCREENS (Not on bottom bar) -->
@@ -74,6 +78,11 @@
             app:argType="integer"
             android:defaultValue="0" />
     </fragment>
+    <fragment
+        android:id="@+id/favoritesFragment"
+        android:name="com.example.cinephile.ui.favorites.FavoritesFragment"
+        android:label="Favorites"
+        tools:layout="@layout/fragment_watchlist" />
 
     <!-- 2. GLOBAL ACTION (Allows navigation from ANY screen) -->
     <action

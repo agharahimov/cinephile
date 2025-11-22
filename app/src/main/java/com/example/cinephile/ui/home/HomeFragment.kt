@@ -46,12 +46,14 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // --- TRENDING LIST ---
         trendingAdapter = MovieAdapter(
             onMovieClick = { movie ->
-                // OPEN DETAILS SCREEN
                 openMovieDetails(movie.id)
             },
             onMovieLongClick = { movie ->
-                // Use requireContext() instead of context
-                Toast.makeText(requireContext(), "Long press: ${movie.title}", Toast.LENGTH_SHORT).show()
+                // 1. Save to Database
+                viewModel.addToWatchlist(movie)
+
+                // 2. Show Confirmation
+                Toast.makeText(requireContext(), "${movie.title} added to Watchlist", Toast.LENGTH_SHORT).show()
             }
         )
 
@@ -63,10 +65,13 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         // --- RECOMMENDATION LIST ---
         recommendationAdapter = MovieAdapter(
             onMovieClick = { movie ->
-                // OPEN DETAILS SCREEN
                 openMovieDetails(movie.id)
             },
-            onMovieLongClick = { }
+            onMovieLongClick = { movie ->
+                // Same logic for recommendations
+                viewModel.addToWatchlist(movie)
+                Toast.makeText(requireContext(), "${movie.title} added to Watchlist", Toast.LENGTH_SHORT).show()
+            }
         )
 
         rvRecommendations.apply {

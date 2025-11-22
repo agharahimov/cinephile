@@ -47,29 +47,45 @@ class DetailsViewModel(
     }
 
     // Toggle Favorite logic
-    fun toggleFavorite() {
-        val currentMovie = _uiState.value.movie ?: return
+    // --- TOGGLE FAVORITE ---
+    fun toggleFavorite(movie: Movie? = _uiState.value.movie) {
+        val targetMovie = movie ?: return
+
         viewModelScope.launch {
-            if (_uiState.value.isFavorite) {
-                userRepo.unlikeMovie(currentMovie.id)
+            if (userRepo.isMovieLiked(targetMovie.id)) {
+                userRepo.unlikeMovie(targetMovie.id)
+                // Update State: It was true, now it's false
+                _uiState.value = _uiState.value.copy(isFavorite = false)
             } else {
-                userRepo.likeMovie(currentMovie)
+                userRepo.likeMovie(targetMovie)
+                // Update State: It was false, now it's true
+                _uiState.value = _uiState.value.copy(isFavorite = true)
             }
-            // Update UI immediately
-            _uiState.value = _uiState.value.copy(isFavorite = !_uiState.value.isFavorite)
+        }
+    }
+    fun checkDatabaseStatus(movieId: Int) {
+        viewModelScope.launch {
+            val isFav = userRepo.isMovieLiked(movieId)
+            val isWatch = userRepo.isMovieInWatchlist(movieId)
+            // Update UI State instantly
+            _uiState.value = _uiState.value.copy(isFavorite = isFav, isInWatchlist = isWatch)
         }
     }
 
     // Toggle Watchlist logic
-    fun toggleWatchlist() {
-        val currentMovie = _uiState.value.movie ?: return
+    fun toggleWatchlist(movie: Movie? = _uiState.value.movie) {
+        val targetMovie = movie ?: return
+
         viewModelScope.launch {
-            if (_uiState.value.isInWatchlist) {
-                userRepo.removeMovieFromWatchlist(currentMovie.id)
+            // 1. Database Operation
+            if (userRepo.isMovieInWatchlist(targetMovie.id)) {
+                userRepo.removeMovieFromWatchlist(targetMovie.id)
             } else {
-                userRepo.addMovieToWatchlist(currentMovie)
+                userRepo.addMovieToWatchlist(targetMovie)
             }
-            // Update UI immediately
+
+            // 2. ALWAYS update the UI state
+            // Removed: if (_uiState.value.movie?.id == targetMovie.id)
             _uiState.value = _uiState.value.copy(isInWatchlist = !_uiState.value.isInWatchlist)
         }
     }

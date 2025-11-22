@@ -10,6 +10,7 @@ import androidx.navigation.fragment.findNavController // Required for navigation
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
+import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.ui.ViewModelFactory
 import com.google.android.material.chip.ChipGroup
 import kotlinx.coroutines.launch
@@ -37,14 +38,13 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
         // 3. SETUP RECYCLERVIEW
         movieAdapter = MovieAdapter(
             onMovieClick = { movie ->
-                // --- NAVIGATION LOGIC ADDED HERE ---
                 val bundle = Bundle().apply { putInt("movieId", movie.id) }
-                // Use the global action to jump to details from anywhere
                 findNavController().navigate(R.id.action_global_detailsFragment, bundle)
             },
             onMovieLongClick = { movie ->
-                // For now, keep the Toast. You can implement the actual DB call later via ViewModel.
-                Toast.makeText(context, "Long pressed: ${movie.title}", Toast.LENGTH_SHORT).show()
+                // --- LOGIC ADDED HERE ---
+                viewModel.addToWatchlist(movie)
+                Toast.makeText(context, "${movie.title} added to Watchlist", Toast.LENGTH_SHORT).show()
             }
         )
 

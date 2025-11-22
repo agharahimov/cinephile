@@ -13,5 +13,6 @@ data class Movie(
     val backdropUrl: String,
     val overview: String,
     val releaseDate: String,
-    val rating: Double = 0.0
+    val rating: Double = 0.0,
+    val director: String = ""
 )

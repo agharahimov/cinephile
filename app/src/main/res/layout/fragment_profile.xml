@@ -36,6 +36,23 @@
         app:cornerRadius="16dp"
         android:backgroundTint="#1E1E1E"
         android:layout_marginBottom="16dp"/>
+    <!-- FAVORITES BUTTON -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnGoToFavorites"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:text="My Favorites"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center_vertical|start"
+        android:paddingStart="24dp"
+        app:icon="@android:drawable/btn_star"
+        app:iconGravity="textStart"
+        app:iconPadding="16dp"
+        app:iconTint="@color/white"
+        app:cornerRadius="16dp"
+        android:backgroundTint="#1E1E1E"
+        android:layout_marginBottom="16dp"/>
 
     <!-- 2. SETTINGS BUTTON -->
     <com.google.android.material.button.MaterialButton
