@@ -38,8 +38,8 @@ class DatabaseCollectionsTest {
     @Throws(Exception::class)
     fun insertAndRetrieveCollections_worksCorrectly() = runBlocking {
         // Arrange: Create a sample movie and a sample custom list
-        val testMovie = MovieEntity(123, "Test Movie", "/path.jpg", "2025",
-            isInWatchlist = false, isLiked = false)
+        val testMovie = MovieEntity(123, "Test Movie", "/path.jpg", "test overview", "/path2.jpg", "2012",
+            isInWatchlist = false,  isLiked = false)
         val testList = UserListEntity(name = "My Test List")
 
         // Act Part 1: Insert data

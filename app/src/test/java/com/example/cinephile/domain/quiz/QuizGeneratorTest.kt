@@ -16,11 +16,11 @@ class QuizGeneratorTest {
         quizGenerator = QuizGenerator()
         // Create 5 sample movies so we have enough data for options
         sampleMovies = listOf(
-            Movie(1, "Inception", "http://url1", "A thief enters dreams...", "2010-07-16"),
-            Movie(2, "Dark Knight", "http://url2", "Batman fights Joker...", "2008-07-18"),
-            Movie(3, "Interstellar", "http://url3", "Astronauts go to space...", "2014-11-05"),
-            Movie(4, "Dunkirk", "http://url4", "Soldiers evacuate beach...", "2017-07-21"),
-            Movie(5, "Tenet", "http://url5", "Spies invert time...", "2020-08-26")
+            Movie(1, "Inception", "http://url1", "http://url1", "A thief enters dreams...", "2010-07-16"),
+            Movie(2, "Dark Knight", "http://url2", "http://url2", "Batman fights Joker...", "2008-07-18"),
+            Movie(3, "Interstellar", "http://url3", "http://url3", "Astronauts go to space...", "2014-11-05"),
+            Movie(4, "Dunkirk", "http://url4", "http://url4", "Soldiers evacuate beach...", "2017-07-21"),
+            Movie(5, "Tenet", "http://url5", "http://url5", "Spies invert time...", "2020-08-26")
         )
     }
 

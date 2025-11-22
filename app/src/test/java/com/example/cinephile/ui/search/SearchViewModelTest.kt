@@ -44,17 +44,18 @@ class SearchViewModelTest {
     fun `searchMovies with valid query success should update state to Success`() = runTest {
         // Arrange
         val query = "Inception"
+        val type = SearchType.TITLE
         val fakeMovies = listOf(
-            Movie(1, "Inception", "url1", "overview1", "2010")
+            Movie(1, "Inception", "url1", "url1", "overview1", "2010")
         )
-        whenever(mockMovieRepository.searchMovies(query)).thenReturn(Result.success(fakeMovies))
+        whenever(mockMovieRepository.searchMovies(query, type)).thenReturn(Result.success(fakeMovies))
 
         // Act
         viewModel.searchMovies(query)
         testDispatcher.scheduler.advanceUntilIdle() // Execute the coroutine
 
         // Assert
-        verify(mockMovieRepository).searchMovies(query) // Ensure the repository was called
+        verify(mockMovieRepository).searchMovies(query, type) // Ensure the repository was called
         val uiState = viewModel.uiState.value
         assertTrue("UI State should be Success", uiState is SearchUiState.Success)
         assertEquals(fakeMovies, (uiState as SearchUiState.Success).movies)
@@ -64,8 +65,9 @@ class SearchViewModelTest {
     fun `searchMovies failure should update state to Error`() = runTest {
         // Arrange
         val query = "FailureQuery"
+        val type = SearchType.TITLE
         val errorMessage = "Network Error"
-        whenever(mockMovieRepository.searchMovies(query)).thenReturn(Result.failure(Exception(errorMessage)))
+        whenever(mockMovieRepository.searchMovies(query, type)).thenReturn(Result.failure(Exception(errorMessage)))
 
         // Act
         viewModel.searchMovies(query)

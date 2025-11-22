@@ -25,6 +25,7 @@ class UserCollectionsRepositoryImplTest {
         title = "Test Movie",
         posterUrl = "https://image.tmdb.org/t/p/w500/poster.jpg",
         overview = "Test Overview",
+        backdropUrl = "https://image.tmdb.org/t/p/w500/backdrop.jpg",
         releaseDate = "2025"
     )
 
@@ -58,7 +59,7 @@ class UserCollectionsRepositoryImplTest {
     fun `addMovieToWatchlist (Existing Liked Movie) should set isInWatchlist=true and PRESERVE isLiked`() = runTest {
         // Arrange: Simulate that the movie IS already in the DB and is LIKED
         val existingEntity = MovieEntity(
-            id = 1, title = "Test Movie", posterPath = "/poster.jpg", overview = "Overview", releaseDate = "2025",
+            id = 1, title = "Test Movie", posterPath = "/poster.jpg", overview = "Overview", backdropPath = "/backdrop.jpg", releaseDate = "2025",
             isInWatchlist = false,
             isLiked = true // It is already liked
         )
@@ -81,7 +82,7 @@ class UserCollectionsRepositoryImplTest {
     fun `likeMovie (Existing Watchlist Movie) should set isLiked=true and PRESERVE isInWatchlist`() = runTest {
         // Arrange: Simulate movie is in Watchlist but NOT Liked
         val existingEntity = MovieEntity(
-            id = 1, title = "Test Movie", posterPath = "/poster.jpg", overview = "Overview", releaseDate = "2025",
+            id = 1, title = "Test Movie", posterPath = "/poster.jpg", overview = "Overview", backdropPath = "/backdrop.jpg", releaseDate = "2025",
             isInWatchlist = true, // It is in watchlist
             isLiked = false
         )
@@ -104,7 +105,7 @@ class UserCollectionsRepositoryImplTest {
     fun `getWatchlist should fetch from DAO and map correctly`() = runTest {
         // Arrange
         val dbEntity = MovieEntity(
-            id = 1, title = "Test Movie", posterPath = "/poster.jpg", overview = "Overview", releaseDate = "2025",
+            id = 1, title = "Test Movie", posterPath = "/poster.jpg", overview = "Overview", backdropPath = "/backdrop.jpg", releaseDate = "2025",
             isInWatchlist = true, isLiked = false
         )
         whenever(mockMovieDao.getWatchlistMovies()).thenReturn(listOf(dbEntity))

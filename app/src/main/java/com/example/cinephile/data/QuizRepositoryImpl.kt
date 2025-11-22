@@ -42,6 +42,7 @@ class QuizRepositoryImpl(private val movieDao: MovieDao) : QuizRepository {
             // Reconstruct full URL if needed, or pass as is if already stored fully
             posterUrl = if (this.posterPath?.startsWith("http") == true) this.posterPath else "https://image.tmdb.org/t/p/w500${this.posterPath}",
             overview = this.overview,
+            backdropUrl = this.backdropPath ?: this.posterPath ?: "",
             releaseDate = this.releaseDate
         )
     }
