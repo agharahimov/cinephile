@@ -64,7 +64,9 @@
                 android:src="@android:drawable/btn_star"
                 app:tint="#99AABB"/>
 
+            <!-- ADDED ID HERE: tvSheetLike -->
             <TextView
+                android:id="@+id/tvSheetLike"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Like"
@@ -91,7 +93,9 @@
                 android:src="@android:drawable/ic_input_add"
                 app:tint="#99AABB"/>
 
+            <!-- ADDED ID HERE: tvSheetWatchlist -->
             <TextView
+                android:id="@+id/tvSheetWatchlist"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Watchlist"
@@ -114,7 +118,6 @@
         android:secondaryProgressTint="#2C3E50"
         android:progressBackgroundTint="#2C3E50"
         style="?android:attr/ratingBarStyleIndicator"/>
-    <!-- Note: Use style="?android:attr/ratingBarStyle" if you want it interactive -->
 
     <TextView
         android:layout_width="wrap_content"

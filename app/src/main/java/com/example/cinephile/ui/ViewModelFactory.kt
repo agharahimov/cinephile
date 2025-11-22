@@ -26,8 +26,12 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
             }
             // 2. Search
             modelClass.isAssignableFrom(SearchViewModel::class.java) -> {
-                val repository = MovieRepositoryImpl()
-                SearchViewModel(repository) as T
+                val apiRepo = MovieRepositoryImpl()
+                // Create DB Repo
+                val dbRepo = UserCollectionsRepositoryImpl(db.movieDao(), db.userListDao())
+
+                // Pass BOTH to SearchViewModel
+                SearchViewModel(apiRepo, dbRepo) as T
             }
             // 3. Watchlist (NEW ADDITION)
             modelClass.isAssignableFrom(WatchlistViewModel::class.java) -> {
@@ -37,8 +41,12 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
             }
             // 4. Home (Trending/Recos)
             modelClass.isAssignableFrom(com.example.cinephile.ui.home.HomeViewModel::class.java) -> {
-                val repository = MovieRepositoryImpl()
-                com.example.cinephile.ui.home.HomeViewModel(repository) as T
+                val apiRepo = MovieRepositoryImpl()
+                // Create the Database Repo
+                val dbRepo = UserCollectionsRepositoryImpl(db.movieDao(), db.userListDao())
+
+                // Pass BOTH to HomeViewModel
+                com.example.cinephile.ui.home.HomeViewModel(apiRepo, dbRepo) as T
             }
             // 5. Details Screen (Requires API + DB)
             modelClass.isAssignableFrom(com.example.cinephile.ui.details.DetailsViewModel::class.java) -> {
@@ -47,6 +55,11 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
                 val dbRepo = UserCollectionsRepositoryImpl(db.movieDao(), db.userListDao())
 
                 com.example.cinephile.ui.details.DetailsViewModel(apiRepo, dbRepo) as T
+            }
+            // 7. Favorites
+            modelClass.isAssignableFrom(com.example.cinephile.ui.favorites.FavoritesViewModel::class.java) -> {
+                val dbRepo = UserCollectionsRepositoryImpl(db.movieDao(), db.userListDao())
+                com.example.cinephile.ui.favorites.FavoritesViewModel(dbRepo) as T
             }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }

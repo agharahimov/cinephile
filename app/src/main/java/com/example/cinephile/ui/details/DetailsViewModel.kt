@@ -47,30 +47,41 @@ class DetailsViewModel(
     }
 
     // Toggle Favorite logic
-    fun toggleFavorite() {
-        val currentMovie = _uiState.value.movie ?: return
+    // --- TOGGLE FAVORITE ---
+    fun toggleFavorite(movie: Movie? = _uiState.value.movie) {
+        // 1. DEFINE 'targetMovie' HERE (This was missing)
+        val targetMovie = movie ?: return
+
         viewModelScope.launch {
-            if (_uiState.value.isFavorite) {
-                userRepo.unlikeMovie(currentMovie.id)
+            // 2. USE 'targetMovie'
+            if (userRepo.isMovieLiked(targetMovie.id)) {
+                userRepo.unlikeMovie(targetMovie.id)
             } else {
-                userRepo.likeMovie(currentMovie)
+                userRepo.likeMovie(targetMovie)
             }
-            // Update UI immediately
-            _uiState.value = _uiState.value.copy(isFavorite = !_uiState.value.isFavorite)
+
+            if (_uiState.value.movie?.id == targetMovie.id) {
+                _uiState.value = _uiState.value.copy(isFavorite = !_uiState.value.isFavorite)
+            }
         }
     }
 
     // Toggle Watchlist logic
-    fun toggleWatchlist() {
-        val currentMovie = _uiState.value.movie ?: return
+    fun toggleWatchlist(movie: Movie? = _uiState.value.movie) {
+        // 1. DEFINE 'targetMovie' HERE
+        val targetMovie = movie ?: return
+
         viewModelScope.launch {
-            if (_uiState.value.isInWatchlist) {
-                userRepo.removeMovieFromWatchlist(currentMovie.id)
+            // 2. USE 'targetMovie'
+            if (userRepo.isMovieInWatchlist(targetMovie.id)) {
+                userRepo.removeMovieFromWatchlist(targetMovie.id)
             } else {
-                userRepo.addMovieToWatchlist(currentMovie)
+                userRepo.addMovieToWatchlist(targetMovie)
             }
-            // Update UI immediately
-            _uiState.value = _uiState.value.copy(isInWatchlist = !_uiState.value.isInWatchlist)
+
+            if (_uiState.value.movie?.id == targetMovie.id) {
+                _uiState.value = _uiState.value.copy(isInWatchlist = !_uiState.value.isInWatchlist)
+            }
         }
     }
 }

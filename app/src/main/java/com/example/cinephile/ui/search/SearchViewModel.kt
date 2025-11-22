@@ -8,13 +8,19 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import com.example.cinephile.domain.repository.UserCollectionsRepository
+import com.example.cinephile.domain.model.Movie
 
-// The constructor parameter is named "movieRepository". This is correct.
-class   SearchViewModel(private val movieRepository: MovieRepository) : ViewModel() {
+class   SearchViewModel(
+    private val movieRepository: MovieRepository,
+    private val userRepo: UserCollectionsRepository
+    ) : ViewModel() {
+
 
     // CORRECTED: The StateFlow now correctly holds a SearchUiState object.
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
     val uiState: StateFlow<SearchUiState> = _uiState
+
 
     private var searchJob: Job? = null
 
@@ -41,6 +47,11 @@ class   SearchViewModel(private val movieRepository: MovieRepository) : ViewMode
             }.onFailure { error ->
                 _uiState.value = SearchUiState.Error(error.message ?: "An unknown error occurred")
             }
+        }
+    }
+    fun addToWatchlist(movie: Movie) {
+        viewModelScope.launch {
+            userRepo.addMovieToWatchlist(movie)
         }
     }
 }

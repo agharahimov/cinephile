@@ -26,17 +26,14 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
 
         if (movieId != 0) viewModel.loadMovie(movieId)
 
-        // --- 1. FIND THE NEW VIEWS (Updated IDs) ---
+        // --- 1. UI References ---
         val ivBackdrop = view.findViewById<ImageView>(R.id.ivBackdrop)
         val ivSmallPoster = view.findViewById<ImageView>(R.id.ivSmallPoster)
-
         val tvTitle = view.findViewById<TextView>(R.id.tvDetailTitle)
         val tvDate = view.findViewById<TextView>(R.id.tvDetailDate)
         val tvOverview = view.findViewById<TextView>(R.id.tvDetailOverview)
         val btnBack = view.findViewById<View>(R.id.btnBack)
-
         val tvRating = view.findViewById<TextView>(R.id.tvRatingText)
-
         val bottomActionContainer = view.findViewById<View>(R.id.bottomActionContainer)
 
         // --- 2. LOGIC ---
@@ -44,14 +41,12 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
             findNavController().navigateUp()
         }
 
+        // --- THE FIX IS HERE ---
         bottomActionContainer.setOnClickListener {
             val currentMovie = viewModel.uiState.value.movie
             if (currentMovie != null) {
-                val bottomSheet = ActionBottomSheet.newInstance(
-                    currentMovie.id,
-                    currentMovie.title,
-                    currentMovie.releaseDate
-                )
+                // FIXED: Pass the whole 'currentMovie' object, not 3 separate variables
+                val bottomSheet = ActionBottomSheet.newInstance(currentMovie)
                 bottomSheet.show(parentFragmentManager, "ActionSheet")
             }
         }
@@ -60,24 +55,26 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 state.movie?.let { movie ->
-
-                    // Text Updates
                     tvTitle.text = movie.title
-                    tvDate.text = movie.releaseDate
+
+                    // Date formatting logic
+                    val year = if (movie.releaseDate.length >= 4) movie.releaseDate.take(4) else "Unknown"
+                    if (movie.director.isNotEmpty()) {
+                        tvDate.text = "$year • ${movie.director}"
+                    } else {
+                        tvDate.text = year
+                    }
+
                     tvOverview.text = movie.overview
                     tvRating.text = "TMDB: ${String.format("%.1f", movie.rating)}"
 
-                    // --- IMAGE LOADING FIX ---
-
-                    // 1. TOP IMAGE: Load 'backdropUrl' (Wide image)
+                    // Load Images
                     ivBackdrop.load(movie.backdropUrl) {
                         crossfade(true)
                         placeholder(android.R.drawable.ic_menu_gallery)
-                        // If no backdrop exists, you might want to set a color or error drawable
                         error(android.R.color.darker_gray)
                     }
 
-                    // 2. SIDE POSTER: Load 'posterUrl' (Tall image)
                     ivSmallPoster.load(movie.posterUrl) {
                         crossfade(true)
                     }

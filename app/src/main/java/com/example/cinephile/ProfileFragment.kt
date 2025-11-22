@@ -45,5 +45,11 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
                 Toast.makeText(context, "Settings coming soon!", Toast.LENGTH_SHORT).show()
             }
         }
+        view.findViewById<View>(R.id.btnGoToFavorites).setOnClickListener {
+            // Navigate to Favorites Fragment
+            // Make sure you added this Action ID to your nav_graph.xml!
+            findNavController().navigate(R.id.action_profileFragment_to_favoritesFragment)
+        }
+
     }
 }
