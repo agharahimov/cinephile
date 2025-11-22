@@ -34,7 +34,7 @@ class   SearchViewModel(private val movieRepository: MovieRepository) : ViewMode
 
             _uiState.value = SearchUiState.Loading
 
-            val result = movieRepository.searchMovies(query)
+            val result = movieRepository.searchMovies(query, searchType)
 
             result.onSuccess { movies ->
                 _uiState.value = SearchUiState.Success(movies)

@@ -1,21 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="@color/black"
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/tvHomeTitle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Trending Movies"
-        android:textColor="@android:color/white"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="vertical"
+        android:paddingBottom="100dp"> <!-- Padding so content isn't hidden behind BottomBar -->
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- SECTION 1: TRENDING -->
+        <TextView
+            android:id="@+id/tvTrendingTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Trending This Week"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Horizontal List for Trending -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvTrending"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_movie_grid"/>
+
+        <!-- SECTION 2: RECOMMENDATIONS -->
+        <TextView
+            android:id="@+id/tvRecTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Recommended For You"
+            android:textColor="@android:color/white"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="32dp"
+            android:layout_marginBottom="12dp"/>
+
+        <!-- Horizontal List for Recommendations -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvRecommendations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:clipToPadding="false"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_movie_grid"/>
+
+        <!-- Empty State Text for Recommendations (Optional) -->
+        <TextView
+            android:id="@+id/tvRecPlaceholder"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Top rated movies you might like..."
+            android:textColor="#888888"
+            android:textSize="14sp"
+            android:paddingStart="16dp"
+            android:visibility="gone"/>
+
+        <!-- LOADING INDICATOR -->
+        <!-- Centered in the screen initially -->
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="50dp"
+            android:visibility="visible"/>
+
+    </LinearLayout>
+
+</androidx.core.widget.NestedScrollView>
