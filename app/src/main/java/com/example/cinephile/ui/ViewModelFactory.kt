@@ -35,6 +35,19 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
                 val repository = UserCollectionsRepositoryImpl(db.movieDao(), db.userListDao())
                 WatchlistViewModel(repository) as T
             }
+            // 4. Home (Trending/Recos)
+            modelClass.isAssignableFrom(com.example.cinephile.ui.home.HomeViewModel::class.java) -> {
+                val repository = MovieRepositoryImpl()
+                com.example.cinephile.ui.home.HomeViewModel(repository) as T
+            }
+            // 5. Details Screen (Requires API + DB)
+            modelClass.isAssignableFrom(com.example.cinephile.ui.details.DetailsViewModel::class.java) -> {
+                val apiRepo = MovieRepositoryImpl()
+                // Use the DB to create the UserRepo
+                val dbRepo = UserCollectionsRepositoryImpl(db.movieDao(), db.userListDao())
+
+                com.example.cinephile.ui.details.DetailsViewModel(apiRepo, dbRepo) as T
+            }
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")
         }
     }

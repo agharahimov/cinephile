@@ -42,7 +42,7 @@
             android:text=""/>
     </LinearLayout>
 
-    <!-- 2. FILTER CHIPS (Scrollable horizontally) -->
+    <!-- 2. FILTER CHIPS (Updated for Single Selection Logic) -->
     <HorizontalScrollView
         android:id="@+id/scrollFilters"
         android:layout_width="match_parent"
@@ -52,48 +52,49 @@
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/searchContainer">
 
+        <!-- Added singleSelection and selectionRequired -->
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipGroupFilters"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:singleLine="true">
+            android:singleLine="true"
+            app:singleSelection="true"
+            app:selectionRequired="true">
 
+            <!-- Changed Style to 'Choice' so they look like toggle buttons -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipTitle"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Title"
-                android:checkable="true"
                 android:checked="true"
-                android:textColor="@android:color/white"
-                app:chipBackgroundColor="#333333"/>
+                android:textColor="@android:color/white" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipYear"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Year"
-                android:checkable="true"
-                android:textColor="@android:color/white"
-                app:chipBackgroundColor="#333333"/>
+                android:textColor="@android:color/white" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipGenre"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Genre"
-                android:checkable="true"
-                android:textColor="@android:color/white"
-                app:chipBackgroundColor="#333333"/>
+                android:textColor="@android:color/white" />
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipDirector"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Director"
-                android:checkable="true"
-                android:textColor="@android:color/white"
-                app:chipBackgroundColor="#333333"/>
+                android:textColor="@android:color/white" />
+
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 

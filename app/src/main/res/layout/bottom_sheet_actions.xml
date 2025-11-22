@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#26303C"
+    android:padding="24dp">
+
+    <!-- Drag Handle -->
+    <View
+        android:layout_width="40dp"
+        android:layout_height="4dp"
+        android:background="#555E69"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Movie Title & Year -->
+    <TextView
+        android:id="@+id/tvSheetTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Movie Title"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvSheetYear"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2025"
+        android:textColor="#8899AA"
+        android:textSize="14sp"
+        android:layout_marginTop="4dp"
+        android:layout_gravity="center"/>
+
+    <!-- ACTIONS ROW (Like & Watchlist) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="32dp">
+
+        <!-- 1. LIKE ACTION -->
+        <LinearLayout
+            android:id="@+id/btnSheetLike"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:id="@+id/ivSheetLike"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/btn_star"
+                app:tint="#99AABB"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Like"
+                android:textColor="#99AABB"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+        <!-- 2. WATCHLIST ACTION -->
+        <LinearLayout
+            android:id="@+id/btnSheetWatchlist"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackgroundBorderless">
+
+            <ImageView
+                android:id="@+id/ivSheetWatchlist"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@android:drawable/ic_input_add"
+                app:tint="#99AABB"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Watchlist"
+                android:textColor="#99AABB"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- RATING BAR -->
+    <RatingBar
+        android:id="@+id/ratingBarSheet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:numStars="5"
+        android:stepSize="0.5"
+        android:rating="0"
+        android:progressTint="#2C3E50"
+        android:secondaryProgressTint="#2C3E50"
+        android:progressBackgroundTint="#2C3E50"
+        style="?android:attr/ratingBarStyleIndicator"/>
+    <!-- Note: Use style="?android:attr/ratingBarStyle" if you want it interactive -->
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Rate"
+        android:textColor="#556677"
+        android:layout_gravity="center"
+        android:layout_marginTop="8dp"/>
+
+</LinearLayout>
