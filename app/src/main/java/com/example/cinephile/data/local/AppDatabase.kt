@@ -12,7 +12,7 @@ import androidx.room.RoomDatabase
         UserListEntity::class,
         UserListMovieCrossRef::class
     ],
-    version = 2, // IMPORTANT: We have changed the MovieEntity, so we MUST increment the version number.
+    version = 4, // IMPORTANT: We have changed the MovieEntity, so we MUST increment the version number.
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {

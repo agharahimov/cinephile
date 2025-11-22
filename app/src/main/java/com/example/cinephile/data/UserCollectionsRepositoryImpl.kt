@@ -132,6 +132,7 @@ private fun Movie.toEntity(
         id = this.id,
         title = this.title,
         posterPath = this.posterUrl.substringAfterLast('/'), // Extract path from full URL
+        overview = this.overview,
         releaseDate = this.releaseDate,
         // Use the passed in status, or default to false
         isInWatchlist = isInWatchlist ?: false,
@@ -145,7 +146,7 @@ private fun MovieEntity.toDomainModel(): Movie {
         title = this.title,
         // Rebuild the full URL for the domain model
         posterUrl = "https://image.tmdb.org/t/p/w500${this.posterPath}",
-        overview = "", // Overview is not stored in your MovieEntity, so we leave it blank
+        overview = this.overview,
         releaseDate = this.releaseDate
     )
 }
