@@ -2,6 +2,7 @@ package com.example.cinephile.data
 
 import com.example.cinephile.data.remote.RetrofitClient
 import com.example.cinephile.data.remote.TmdbApiService
+import com.example.cinephile.ui.search.SearchType
 import com.google.gson.Gson
 import kotlinx.coroutines.test.runTest
 import okhttp3.mockwebserver.MockResponse
@@ -65,7 +66,7 @@ class MovieRepositoryImplTest {
         mockWebServer.enqueue(MockResponse().setBody(fakeJsonResponse).setResponseCode(200))
 
         // Act: Call the function we want to test
-        val result = repository.searchMovies("any query")
+        val result = repository.searchMovies("any query", SearchType.TITLE)
 
         // Assert: Check the outcome
         assertTrue(result.isSuccess)
@@ -85,7 +86,7 @@ class MovieRepositoryImplTest {
         mockWebServer.enqueue(MockResponse().setResponseCode(404))
 
         // Act
-        val result = repository.searchMovies("any query")
+        val result = repository.searchMovies("any query", SearchType.TITLE)
 
         // Assert
         assertTrue(result.isFailure)
