@@ -1,15 +1,15 @@
 package com.example.cinephile.ui.quiz
 
+import android.os.CountDownTimer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.cinephile.data.QuizRepositoryImpl
 import com.example.cinephile.domain.model.Question
 import com.example.cinephile.domain.model.Quiz
+import com.example.cinephile.domain.repository.QuizRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// UI State for the Quiz Screen
 sealed class QuizUiState {
     object Loading : QuizUiState()
     data class Error(val message: String) : QuizUiState()
@@ -22,14 +22,20 @@ sealed class QuizUiState {
     data class GameOver(val score: Int, val totalQuestions: Int) : QuizUiState()
 }
 
-class QuizViewModel(private val repository: QuizRepositoryImpl) : ViewModel() {
+class QuizViewModel(private val repository: QuizRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow<QuizUiState>(QuizUiState.Loading)
     val uiState: StateFlow<QuizUiState> = _uiState
 
+    // --- TIMER STATE ---
+    private val _timerProgress = MutableStateFlow(100)
+    val timerProgress: StateFlow<Int> = _timerProgress
+
     private var currentQuiz: Quiz? = null
     private var questionIndex = 0
     private var score = 0
+    private var timer: CountDownTimer? = null
+    private val TIME_PER_QUESTION = 15000L // 15 Seconds per question
 
     init {
         startNewQuiz()
@@ -52,31 +58,59 @@ class QuizViewModel(private val repository: QuizRepositoryImpl) : ViewModel() {
     }
 
     fun submitAnswer(selectedOption: String) {
+        // Stop timer immediately when user answers
+        timer?.cancel()
+
         val quiz = currentQuiz ?: return
         val currentQ = quiz.questions[questionIndex]
 
-        // Check logic
         if (selectedOption == currentQ.correctAnswer) {
             score++
         }
 
-        // Move to next
+        // Check if more questions exist
         if (questionIndex < quiz.questions.lastIndex) {
             questionIndex++
             emitQuestion()
         } else {
-            // Game Over
             _uiState.value = QuizUiState.GameOver(score, quiz.questions.size)
         }
     }
 
     private fun emitQuestion() {
         val quiz = currentQuiz ?: return
+
+        // 1. Update UI to show question
         _uiState.value = QuizUiState.Playing(
             currentQuestionIndex = questionIndex,
             totalQuestions = quiz.questions.size,
             question = quiz.questions[questionIndex],
             score = score
         )
+
+        // 2. Start Timer
+        startTimer()
+    }
+
+    private fun startTimer() {
+        timer?.cancel()
+        timer = object : CountDownTimer(TIME_PER_QUESTION, 100) {
+            override fun onTick(millisUntilFinished: Long) {
+                // Calculate percentage (100 -> 0)
+                val progress = ((millisUntilFinished.toFloat() / TIME_PER_QUESTION) * 100).toInt()
+                _timerProgress.value = progress
+            }
+
+            override fun onFinish() {
+                _timerProgress.value = 0
+                // Time is up! Submit empty answer (wrong)
+                submitAnswer("")
+            }
+        }.start()
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        timer?.cancel()
     }
 }
