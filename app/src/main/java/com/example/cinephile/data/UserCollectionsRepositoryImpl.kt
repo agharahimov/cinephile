@@ -151,6 +151,17 @@ class UserCollectionsRepositoryImpl(
         userListDao.getCurrentList()
     }
 
+    override suspend fun deleteUserList(listId: Long) = withContext(Dispatchers.IO) {
+        // 1. Remove all movies from this list first (Cleanup)
+        userListDao.deleteListContents(listId)
+        // 2. Delete the list itself
+        userListDao.deleteList(listId)
+
+        // Optional Safety: If they deleted the "Current" list, we should probably
+        // set the default list as current so the app doesn't get confused.
+        // But for now, simple deletion is fine.
+    }
+
     override suspend fun ensureDefaultListExists() = withContext(Dispatchers.IO) {
         val lists = userListDao.getAllLists()
         if (lists.isEmpty()) {

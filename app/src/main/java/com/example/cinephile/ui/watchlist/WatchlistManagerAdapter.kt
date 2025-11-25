@@ -14,7 +14,8 @@ import com.example.cinephile.data.local.UserListEntity
 
 class WatchlistManagerAdapter(
     private val onListClick: (UserListEntity) -> Unit,
-    private val onSetCurrent: (UserListEntity) -> Unit
+    private val onSetCurrent: (UserListEntity) -> Unit,
+    private val onLongClick: (UserListEntity) -> Unit
 ) : ListAdapter<UserListEntity, WatchlistManagerAdapter.ListViewHolder>(ListDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
@@ -24,14 +25,18 @@ class WatchlistManagerAdapter(
     }
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-        holder.bind(getItem(position), onListClick, onSetCurrent)
+
+        holder.bind(getItem(position), onListClick, onSetCurrent, onLongClick)
     }
 
     class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvName: TextView = itemView.findViewById(R.id.tvListName)
         private val ivCurrent: ImageView = itemView.findViewById(R.id.ivCurrentStatus)
 
-        fun bind(list: UserListEntity, onClick: (UserListEntity) -> Unit, onSet: (UserListEntity) -> Unit) {
+        fun bind(list: UserListEntity,
+                 onClick: (UserListEntity) -> Unit,
+                 onSet: (UserListEntity) -> Unit,
+                 onLongClick: (UserListEntity) -> Unit) {
             tvName.text = list.name
 
             // Visual Logic: Green if current, Gray if not
@@ -43,6 +48,10 @@ class WatchlistManagerAdapter(
                 ivCurrent.setImageResource(android.R.drawable.radiobutton_off_background)
                 ivCurrent.setColorFilter(Color.GRAY)
                 tvName.setTextColor(Color.WHITE)
+            }
+            itemView.setOnLongClickListener {
+                onLongClick(list)
+                true // Return true to indicate the click was consumed
             }
 
             itemView.setOnClickListener { onClick(list) }

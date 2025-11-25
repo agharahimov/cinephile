@@ -39,4 +39,11 @@ class WatchlistManagerViewModel(private val repository: UserCollectionsRepositor
             loadLists() // Refresh to show the green checkmark move
         }
     }
+    fun deleteList(listId: Long) {
+        viewModelScope.launch {
+            repository.deleteUserList(listId)
+            // Refresh the UI to show the list is gone
+            loadLists()
+        }
+    }
 }

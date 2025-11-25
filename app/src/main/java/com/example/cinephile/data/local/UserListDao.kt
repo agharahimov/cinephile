@@ -41,4 +41,12 @@ interface UserListDao {
     }
     @Query("DELETE FROM user_list_movie_cross_ref WHERE listId = :listId AND movieId = :movieId")
     suspend fun removeMovieFromList(listId: Long, movieId: Int)
+
+    // 1. Delete the List itself
+    @Query("DELETE FROM user_lists WHERE listId = :listId")
+    suspend fun deleteList(listId: Long)
+
+    // 2. Delete the connections (Movies inside that list)
+    @Query("DELETE FROM user_list_movie_cross_ref WHERE listId = :listId")
+    suspend fun deleteListContents(listId: Long)
 }

@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
+import android.widget.Toast // <--- FIX: Added Import
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -12,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
+import com.example.cinephile.data.local.UserListEntity
 import com.example.cinephile.ui.ViewModelFactory
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import kotlinx.coroutines.launch
@@ -24,11 +26,9 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist_manager) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Setup ViewModel
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(this, factory)[WatchlistManagerViewModel::class.java]
 
-        // 2. Find Views
         val rvLists = view.findViewById<RecyclerView>(R.id.rvLists)
         val fabAdd = view.findViewById<FloatingActionButton>(R.id.fabAddList)
         val btnBack = view.findViewById<ImageView>(R.id.btnBack)
@@ -38,7 +38,6 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist_manager) {
         // 3. Setup Adapter
         adapter = WatchlistManagerAdapter(
             onListClick = { list ->
-                // LINKING 1: Navigate to the Detail screen, passing the List ID
                 val bundle = Bundle().apply {
                     putLong("listId", list.listId)
                     putString("listName", list.name)
@@ -46,31 +45,38 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist_manager) {
                 findNavController().navigate(R.id.action_watchlistFragment_to_watchlistDetailFragment, bundle)
             },
             onSetCurrent = { list ->
-                // LINKING 2: Update Database to make this the "Active" list
                 viewModel.setAsCurrent(list)
+            },
+            // --- FIX: ADD THE MISSING 3RD ARGUMENT ---
+            onLongClick = { list ->
+                if (list.isCurrent) {
+                    Toast.makeText(context, "Cannot delete the active list.", Toast.LENGTH_SHORT).show()
+                } else {
+                    showDeleteDialog(list) // This calls the function below
+                }
             }
         )
 
         rvLists.layoutManager = LinearLayoutManager(context)
         rvLists.adapter = adapter
 
-        // 4. Observe Data
         lifecycleScope.launch {
             viewModel.lists.collect { lists ->
                 adapter.submitList(lists)
             }
         }
 
-        // 5. Create New List
         fabAdd.setOnClickListener {
             showCreateListDialog()
         }
     }
 
+    // Helper to create list
     private fun showCreateListDialog() {
         val input = EditText(requireContext())
         input.hint = "List Name"
         input.setPadding(50, 30, 50, 30)
+        // Fix text color for dark mode
         input.setTextColor(resources.getColor(android.R.color.black, null))
         input.background = resources.getDrawable(android.R.drawable.edit_text, null)
 
@@ -82,6 +88,19 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist_manager) {
                 if (name.isNotBlank()) {
                     viewModel.createList(name)
                 }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    // --- FIX: Helper to delete list (Ensure this function is inside the class) ---
+    private fun showDeleteDialog(list: UserListEntity) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Delete List")
+            .setMessage("Delete '${list.name}'? This removes all movies inside it.")
+            .setPositiveButton("Delete") { _, _ ->
+                viewModel.deleteList(list.listId)
+                Toast.makeText(context, "Deleted", Toast.LENGTH_SHORT).show()
             }
             .setNegativeButton("Cancel", null)
             .show()
