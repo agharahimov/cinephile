@@ -15,29 +15,37 @@ class UserCollectionsRepositoryImpl(
     private val userListDao: UserListDao
 ) : UserCollectionsRepository {
 
-    // --- Watchlist Impl ---
+    // --- UPDATED: Add to Watchlist (Handles "Current List" Logic) ---
     override suspend fun addMovieToWatchlist(movie: Movie) = withContext(Dispatchers.IO) {
-        // 1. Check if the movie already exists in the database
+        // 1. Ensure movie exists in DB (Save/Update)
+        // We preserve the existing state if it's already there
         val existingEntity = movieDao.getMovieById(movie.id)
+        val entityToInsert = existingEntity?.copy(isInWatchlist = true)
+            ?: movie.toEntity(isInWatchlist = true)
 
-        val entityToInsert = if (existingEntity != null) {
-            // 2a. If it exists, create a copy but set isInWatchlist to true
-            existingEntity.copy(isInWatchlist = true)
-        } else {
-            // 2b. If it's new, convert the domain model to an entity and set isInWatchlist to true
-            movie.toEntity().copy(isInWatchlist = true)
+        movieDao.insertOrUpdateMovie(entityToInsert)
+
+        // 2. Find the Current List (or create one if missing)
+        var currentList = userListDao.getCurrentList()
+        if (currentList == null) {
+            // First time setup: Create default list
+            val defaultId = userListDao.createList(UserListEntity(name = "My Watchlist", isCurrent = true))
+            currentList = UserListEntity(defaultId, "My Watchlist", true)
         }
 
-        // 3. Insert the final, correct entity in a single operation
-        movieDao.insertOrUpdateMovie(entityToInsert)
+        // 3. Link Movie to the Current List
+        val join = UserListMovieCrossRef(listId = currentList.listId, movieId = movie.id)
+        userListDao.addMovieToList(join)
     }
 
     override suspend fun removeMovieFromWatchlist(movieId: Int) = withContext(Dispatchers.IO) {
+        // We just toggle the flag off for now.
         movieDao.setMovieWatchlistStatus(movieId, inWatchlist = false)
     }
 
     override suspend fun getWatchlist(): Result<List<Movie>> = withContext(Dispatchers.IO) {
         try {
+            // Fetches all movies marked as watchlist (Backward compatibility)
             val movieEntities = movieDao.getWatchlistMovies()
             Result.success(movieEntities.map { it.toDomainModel() })
         } catch (e: Exception) {
@@ -49,16 +57,11 @@ class UserCollectionsRepositoryImpl(
         movieDao.getMovieById(movieId)?.isInWatchlist ?: false
     }
 
-    // --- Liked Movies Impl ---
+    // --- Liked Movies Impl (Unchanged) ---
     override suspend fun likeMovie(movie: Movie) = withContext(Dispatchers.IO) {
         val existingEntity = movieDao.getMovieById(movie.id)
-
-        val entityToInsert = if (existingEntity != null) {
-            existingEntity.copy(isLiked = true)
-        } else {
-            movie.toEntity().copy(isLiked = true)
-        }
-
+        val entityToInsert = existingEntity?.copy(isLiked = true)
+            ?: movie.toEntity(isLiked = true)
         movieDao.insertOrUpdateMovie(entityToInsert)
     }
 
@@ -79,17 +82,15 @@ class UserCollectionsRepositoryImpl(
         movieDao.getMovieById(movieId)?.isLiked ?: false
     }
 
-    // --- Custom Lists Impl ---
-    // ... inside the UserCollectionsRepositoryImpl class ...
-
-// --- CUSTOM LISTS IMPLEMENTATION ---
+    // --- CUSTOM LISTS IMPLEMENTATION (Unchanged) ---
 
     override suspend fun createCustomList(name: String): Result<Long> = withContext(Dispatchers.IO) {
         try {
             if (name.isBlank()) {
                 return@withContext Result.failure(IllegalArgumentException("List name cannot be blank."))
             }
-            val newList = UserListEntity(name = name)
+            // New lists are NOT current by default
+            val newList = UserListEntity(name = name, isCurrent = false)
             val newListId = userListDao.createList(newList)
             Result.success(newListId)
         } catch (e: Exception) {
@@ -119,10 +120,25 @@ class UserCollectionsRepositoryImpl(
         }
     }
 
+    // --- NEW LOGIC: List Management Implementation ---
+
+    override suspend fun setCurrentList(listId: Long) = withContext(Dispatchers.IO) {
+        userListDao.updateCurrentList(listId)
+    }
+
+    override suspend fun getCurrentList(): UserListEntity? = withContext(Dispatchers.IO) {
+        userListDao.getCurrentList()
+    }
+
+    override suspend fun ensureDefaultListExists() = withContext(Dispatchers.IO) {
+        val lists = userListDao.getAllLists()
+        if (lists.isEmpty()) {
+            userListDao.createList(UserListEntity(name = "My Watchlist", isCurrent = true))
+        }
+    }
 }
 
-// --- Mapper Functions ---
-// These private functions help convert between your Domain models and your Entity models.
+// --- Mapper Functions (Kept exactly as requested) ---
 
 private fun Movie.toEntity(
     isInWatchlist: Boolean? = null,

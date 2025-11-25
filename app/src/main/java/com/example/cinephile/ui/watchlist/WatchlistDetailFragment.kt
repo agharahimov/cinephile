@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -17,48 +18,59 @@ import com.example.cinephile.ui.ViewModelFactory
 import com.example.cinephile.ui.search.MovieAdapter
 import kotlinx.coroutines.launch
 
-class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
+// RENAME: This is now WatchlistDetailFragment
+class WatchlistDetailFragment : Fragment(R.layout.fragment_watchlist) {
 
     private lateinit var viewModel: WatchlistViewModel
     private lateinit var movieAdapter: MovieAdapter
 
+    // VARIABLE: To track which list we are looking at
+    private var currentListId: Long = 0L
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Setup ViewModel
+        // 1. GET ARGUMENTS (Passed from the Manager Screen)
+        currentListId = arguments?.getLong("listId") ?: 0L
+        val listName = arguments?.getString("listName") ?: "Watchlist"
+
+        // 2. Set the Header Title (e.g. "Horror Movies")
+        view.findViewById<TextView>(R.id.tvHeader).text = listName
+
+        // 3. Setup ViewModel
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(this, factory)[WatchlistViewModel::class.java]
 
-        // 2. Find Views
+        // 4. Find Views
         val rvWatchlist = view.findViewById<RecyclerView>(R.id.rvWatchlist)
         val layoutEmpty = view.findViewById<LinearLayout>(R.id.layoutEmptyState)
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
 
-        // 3. Setup Adapter (Reuse logic)
+        // 5. Setup Adapter (Your existing logic)
         movieAdapter = MovieAdapter(
             onMovieClick = { movie ->
                 val bundle = Bundle().apply { putInt("movieId", movie.id) }
                 findNavController().navigate(R.id.action_global_detailsFragment, bundle)
             },
             onMovieLongClick = { movie ->
-                // Show "Remove" dialog
                 AlertDialog.Builder(requireContext())
                     .setTitle("Remove Movie")
-                    .setMessage("Remove '${movie.title}' from watchlist?")
+                    .setMessage("Remove '${movie.title}' from this list?")
                     .setPositiveButton("Yes") { _, _ ->
                         viewModel.removeFromWatchlist(movie)
                         Toast.makeText(context, "Removed", Toast.LENGTH_SHORT).show()
+                        // Reload THIS specific list
+                        viewModel.loadCustomList(currentListId)
                     }
                     .setNegativeButton("No", null)
                     .show()
             }
         )
 
-        // 3 Columns for a grid look
         rvWatchlist.layoutManager = GridLayoutManager(context, 3)
         rvWatchlist.adapter = movieAdapter
 
-        // 4. Observe Data
+        // 6. Observe Data
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
                 when (state) {
@@ -85,7 +97,7 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
 
     override fun onResume() {
         super.onResume()
-        // Refresh list when returning to this tab
-        viewModel.loadWatchlist()
+        // CRITICAL CHANGE: Load the specific custom list, not just the default one
+        viewModel.loadCustomList(currentListId)
     }
 }
