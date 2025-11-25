@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-// Define the states for the UI
 sealed class WatchlistUiState {
     object Loading : WatchlistUiState()
     object Empty : WatchlistUiState()
@@ -20,15 +19,13 @@ class WatchlistViewModel(private val repository: UserCollectionsRepository) : Vi
     private val _uiState = MutableStateFlow<WatchlistUiState>(WatchlistUiState.Loading)
     val uiState: StateFlow<WatchlistUiState> = _uiState
 
-    // Load data as soon as ViewModel is created
-    init {
-        loadWatchlist()
-    }
-
-    fun loadWatchlist() {
+    // Load movies for a specific Custom List
+    fun loadCustomList(listId: Long) {
         viewModelScope.launch {
             _uiState.value = WatchlistUiState.Loading
-            val result = repository.getWatchlist()
+
+            // If ID is 0, load legacy/default list. If ID > 0, load custom list.
+            val result = if (listId == 0L) repository.getWatchlist() else repository.getMoviesInCustomList(listId)
 
             result.onSuccess { movies ->
                 if (movies.isEmpty()) {
@@ -42,10 +39,18 @@ class WatchlistViewModel(private val repository: UserCollectionsRepository) : Vi
         }
     }
 
-    fun removeFromWatchlist(movie: Movie) {
+    fun removeFromWatchlist(movie: Movie, listId: Long) {
         viewModelScope.launch {
-            repository.removeMovieFromWatchlist(movie.id)
-            loadWatchlist() // Refresh the list
+            if (listId == 0L) {
+                // Legacy behavior (Default list)
+                repository.removeMovieFromWatchlist(movie.id)
+            } else {
+                // New behavior (Custom list)
+                repository.removeMovieFromList(movie.id, listId)
+            }
+
+            // REFRESH the specific list immediately
+            loadCustomList(listId)
         }
     }
 }

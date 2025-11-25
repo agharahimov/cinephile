@@ -1,5 +1,6 @@
 package com.example.cinephile.ui.favorites
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -15,7 +16,7 @@ import com.example.cinephile.ui.search.MovieAdapter
 import com.example.cinephile.ui.watchlist.WatchlistUiState
 import kotlinx.coroutines.launch
 
-class FavoritesFragment : Fragment(R.layout.fragment_watchlist) { // Reusing Watchlist Layout
+class FavoritesFragment : Fragment(R.layout.fragment_favorites) { // Reusing Watchlist Layout
 
     private lateinit var viewModel: FavoritesViewModel
     private lateinit var movieAdapter: MovieAdapter
@@ -29,7 +30,7 @@ class FavoritesFragment : Fragment(R.layout.fragment_watchlist) { // Reusing Wat
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(this, factory)[FavoritesViewModel::class.java]
 
-        val rvList = view.findViewById<RecyclerView>(R.id.rvWatchlist)
+        val rvList = view.findViewById<RecyclerView>(R.id.rvFavorites)
         val layoutEmpty = view.findViewById<LinearLayout>(R.id.layoutEmptyState)
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
 
@@ -38,7 +39,18 @@ class FavoritesFragment : Fragment(R.layout.fragment_watchlist) { // Reusing Wat
                 val bundle = Bundle().apply { putInt("movieId", movie.id) }
                 findNavController().navigate(R.id.action_global_detailsFragment, bundle)
             },
-            onMovieLongClick = { }
+            onMovieLongClick = { movie ->
+                // Show "Remove" dialog
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Remove Movie")
+                    .setMessage("Remove '${movie.title}' from Favorites?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        viewModel.removeFromFavorites(movie)
+                        Toast.makeText(context, "Removed", Toast.LENGTH_SHORT).show()
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
         )
 
         rvList.layoutManager = GridLayoutManager(context, 3)

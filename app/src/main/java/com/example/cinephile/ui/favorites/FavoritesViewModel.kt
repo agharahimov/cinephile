@@ -2,6 +2,7 @@ package com.example.cinephile.ui.favorites
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.repository.UserCollectionsRepository
 import com.example.cinephile.ui.watchlist.WatchlistUiState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,12 @@ class FavoritesViewModel(private val repository: UserCollectionsRepository) : Vi
             }.onFailure {
                 _uiState.value = WatchlistUiState.Empty
             }
+        }
+    }
+    fun removeFromFavorites(movie: Movie) {
+        viewModelScope.launch {
+            repository.unlikeMovie(movie.id)
+            loadFavorites() // Refresh the list
         }
     }
 }

@@ -6,5 +6,6 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "user_lists")
 data class UserListEntity(
     @PrimaryKey(autoGenerate = true) val listId: Long = 0,
-    val name: String
+    val name: String,
+    val isCurrent: Boolean = false
 )
