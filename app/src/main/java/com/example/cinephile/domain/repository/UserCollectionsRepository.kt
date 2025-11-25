@@ -14,6 +14,7 @@ interface UserCollectionsRepository {
     suspend fun setCurrentList(listId: Long)
     suspend fun getCurrentList(): UserListEntity?
     suspend fun ensureDefaultListExists()
+    suspend fun removeMovieFromList(movieId: Int, listId: Long)
 
     // --- Liked Movie Functions ---
     suspend fun likeMovie(movie: Movie)

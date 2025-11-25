@@ -15,37 +15,54 @@ class UserCollectionsRepositoryImpl(
     private val userListDao: UserListDao
 ) : UserCollectionsRepository {
 
-    // --- UPDATED: Add to Watchlist (Handles "Current List" Logic) ---
+    // --- Watchlist Impl ---
     override suspend fun addMovieToWatchlist(movie: Movie) = withContext(Dispatchers.IO) {
-        // 1. Ensure movie exists in DB (Save/Update)
-        // We preserve the existing state if it's already there
+        // 1. Check if the movie already exists in the database
         val existingEntity = movieDao.getMovieById(movie.id)
-        val entityToInsert = existingEntity?.copy(isInWatchlist = true)
-            ?: movie.toEntity(isInWatchlist = true)
 
+        val entityToInsert = if (existingEntity != null) {
+            // 2a. If it exists, create a copy but set isInWatchlist to true
+            existingEntity.copy(isInWatchlist = true)
+        } else {
+            // 2b. If it's new, convert the domain model to an entity and set isInWatchlist to true
+            movie.toEntity().copy(isInWatchlist = true)
+        }
+
+        // 3. Insert the final, correct entity in a single operation
         movieDao.insertOrUpdateMovie(entityToInsert)
 
-        // 2. Find the Current List (or create one if missing)
+        // 4. Add to the Current List
         var currentList = userListDao.getCurrentList()
         if (currentList == null) {
-            // First time setup: Create default list
             val defaultId = userListDao.createList(UserListEntity(name = "My Watchlist", isCurrent = true))
             currentList = UserListEntity(defaultId, "My Watchlist", true)
         }
-
-        // 3. Link Movie to the Current List
         val join = UserListMovieCrossRef(listId = currentList.listId, movieId = movie.id)
         userListDao.addMovieToList(join)
     }
 
+    // Fixed: Removed the erroneous 'listId' usage here
     override suspend fun removeMovieFromWatchlist(movieId: Int) = withContext(Dispatchers.IO) {
-        // We just toggle the flag off for now.
+
+        // 1. Find out which list is currently active (e.g., "Horror" or "My Watchlist")
+        val currentList = userListDao.getCurrentList()
+
+        if (currentList != null) {
+            // 2. DELETE the link between the movie and this list
+            userListDao.removeMovieFromList(currentList.listId, movieId)
+        }
+
+        // 3. Update the boolean flag on the movie itself (for UI consistency)
         movieDao.setMovieWatchlistStatus(movieId, inWatchlist = false)
+    }
+
+    // Added: Missing implementation for removing from a specific list
+    override suspend fun removeMovieFromList(movieId: Int, listId: Long) = withContext(Dispatchers.IO) {
+        userListDao.removeMovieFromList(listId, movieId)
     }
 
     override suspend fun getWatchlist(): Result<List<Movie>> = withContext(Dispatchers.IO) {
         try {
-            // Fetches all movies marked as watchlist (Backward compatibility)
             val movieEntities = movieDao.getWatchlistMovies()
             Result.success(movieEntities.map { it.toDomainModel() })
         } catch (e: Exception) {
@@ -57,11 +74,16 @@ class UserCollectionsRepositoryImpl(
         movieDao.getMovieById(movieId)?.isInWatchlist ?: false
     }
 
-    // --- Liked Movies Impl (Unchanged) ---
+    // --- Liked Movies Impl ---
     override suspend fun likeMovie(movie: Movie) = withContext(Dispatchers.IO) {
         val existingEntity = movieDao.getMovieById(movie.id)
-        val entityToInsert = existingEntity?.copy(isLiked = true)
-            ?: movie.toEntity(isLiked = true)
+
+        val entityToInsert = if (existingEntity != null) {
+            existingEntity.copy(isLiked = true)
+        } else {
+            movie.toEntity().copy(isLiked = true)
+        }
+
         movieDao.insertOrUpdateMovie(entityToInsert)
     }
 
@@ -82,15 +104,14 @@ class UserCollectionsRepositoryImpl(
         movieDao.getMovieById(movieId)?.isLiked ?: false
     }
 
-    // --- CUSTOM LISTS IMPLEMENTATION (Unchanged) ---
+    // --- Custom Lists Impl ---
 
     override suspend fun createCustomList(name: String): Result<Long> = withContext(Dispatchers.IO) {
         try {
             if (name.isBlank()) {
                 return@withContext Result.failure(IllegalArgumentException("List name cannot be blank."))
             }
-            // New lists are NOT current by default
-            val newList = UserListEntity(name = name, isCurrent = false)
+            val newList = UserListEntity(name = name)
             val newListId = userListDao.createList(newList)
             Result.success(newListId)
         } catch (e: Exception) {
@@ -120,7 +141,7 @@ class UserCollectionsRepositoryImpl(
         }
     }
 
-    // --- NEW LOGIC: List Management Implementation ---
+    // --- List Management ---
 
     override suspend fun setCurrentList(listId: Long) = withContext(Dispatchers.IO) {
         userListDao.updateCurrentList(listId)
@@ -138,7 +159,7 @@ class UserCollectionsRepositoryImpl(
     }
 }
 
-// --- Mapper Functions (Kept exactly as requested) ---
+// --- Mapper Functions ---
 
 private fun Movie.toEntity(
     isInWatchlist: Boolean? = null,
@@ -147,7 +168,7 @@ private fun Movie.toEntity(
     return MovieEntity(
         id = this.id,
         title = this.title,
-        posterPath = this.posterUrl, // Extract path from full URL
+        posterPath = this.posterUrl,
         overview = this.overview,
         backdropPath = this.backdropUrl,
         releaseDate = this.releaseDate,
@@ -158,11 +179,9 @@ private fun Movie.toEntity(
 }
 
 private fun MovieEntity.toDomainModel(): Movie {
-    // Base URLs as backup
     val posterBase = "https://image.tmdb.org/t/p/w500"
     val backdropBase = "https://image.tmdb.org/t/p/w780"
 
-    // 1. Smart URL Fix (Handles both full links and partial paths)
     val fixedPosterUrl = if (this.posterPath?.startsWith("http") == true) {
         this.posterPath
     } else {
@@ -182,10 +201,7 @@ private fun MovieEntity.toDomainModel(): Movie {
         backdropUrl = fixedBackdropUrl ?: "",
         overview = "",
         releaseDate = this.releaseDate,
-
-        // 2. RESTORE RATING (Fixes 0.0)
         rating = this.voteAverage,
-
         director = ""
     )
 }

@@ -39,9 +39,18 @@ class WatchlistViewModel(private val repository: UserCollectionsRepository) : Vi
         }
     }
 
-    fun removeFromWatchlist(movie: Movie) {
+    fun removeFromWatchlist(movie: Movie, listId: Long) {
         viewModelScope.launch {
-            repository.removeMovieFromWatchlist(movie.id)
+            if (listId == 0L) {
+                // Legacy behavior (Default list)
+                repository.removeMovieFromWatchlist(movie.id)
+            } else {
+                // New behavior (Custom list)
+                repository.removeMovieFromList(movie.id, listId)
+            }
+
+            // REFRESH the specific list immediately
+            loadCustomList(listId)
         }
     }
 }

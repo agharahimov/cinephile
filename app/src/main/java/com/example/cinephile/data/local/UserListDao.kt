@@ -39,4 +39,6 @@ interface UserListDao {
         clearCurrentFlags()
         setListAsCurrent(listId)
     }
+    @Query("DELETE FROM user_list_movie_cross_ref WHERE listId = :listId AND movieId = :movieId")
+    suspend fun removeMovieFromList(listId: Long, movieId: Int)
 }

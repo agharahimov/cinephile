@@ -57,10 +57,14 @@ class WatchlistDetailFragment : Fragment(R.layout.fragment_watchlist) {
                     .setTitle("Remove Movie")
                     .setMessage("Remove '${movie.title}' from this list?")
                     .setPositiveButton("Yes") { _, _ ->
-                        viewModel.removeFromWatchlist(movie)
+
+                        // --- FIX: Pass 'currentListId' here ---
+                        viewModel.removeFromWatchlist(movie, currentListId)
+
                         Toast.makeText(context, "Removed", Toast.LENGTH_SHORT).show()
-                        // Reload THIS specific list
-                        viewModel.loadCustomList(currentListId)
+
+                        // (You don't need to call loadCustomList here anymore because
+                        // the ViewModel does it automatically now)
                     }
                     .setNegativeButton("No", null)
                     .show()
