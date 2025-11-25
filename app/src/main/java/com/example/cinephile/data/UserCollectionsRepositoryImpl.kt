@@ -131,24 +131,45 @@ private fun Movie.toEntity(
     return MovieEntity(
         id = this.id,
         title = this.title,
-        posterPath = this.posterUrl.substringAfterLast('/'), // Extract path from full URL
+        posterPath = this.posterUrl, // Extract path from full URL
         overview = this.overview,
         backdropPath = this.backdropUrl,
         releaseDate = this.releaseDate,
-        // Use the passed in status, or default to false
+        voteAverage = this.rating,
         isInWatchlist = isInWatchlist ?: false,
         isLiked = isLiked ?: false
     )
 }
 
 private fun MovieEntity.toDomainModel(): Movie {
+    // Base URLs as backup
+    val posterBase = "https://image.tmdb.org/t/p/w500"
+    val backdropBase = "https://image.tmdb.org/t/p/w780"
+
+    // 1. Smart URL Fix (Handles both full links and partial paths)
+    val fixedPosterUrl = if (this.posterPath?.startsWith("http") == true) {
+        this.posterPath
+    } else {
+        "$posterBase${this.posterPath}"
+    }
+
+    val fixedBackdropUrl = if (this.backdropPath?.startsWith("http") == true) {
+        this.backdropPath
+    } else {
+        "$backdropBase${this.backdropPath}"
+    }
+
     return Movie(
         id = this.id,
         title = this.title,
-        // Rebuild the full URL for the domain model
-        posterUrl = "https://image.tmdb.org/t/p/w500${this.posterPath}",
-        overview = this.overview,
-        backdropUrl = this.backdropPath ?: this.posterPath ?: "",
-        releaseDate = this.releaseDate
+        posterUrl = fixedPosterUrl ?: "",
+        backdropUrl = fixedBackdropUrl ?: "",
+        overview = "",
+        releaseDate = this.releaseDate,
+
+        // 2. RESTORE RATING (Fixes 0.0)
+        rating = this.voteAverage,
+
+        director = ""
     )
 }
