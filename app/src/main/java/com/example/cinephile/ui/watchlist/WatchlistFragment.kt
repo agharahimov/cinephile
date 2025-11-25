@@ -9,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
@@ -36,7 +37,8 @@ class WatchlistFragment : Fragment(R.layout.fragment_watchlist) {
         // 3. Setup Adapter (Reuse logic)
         movieAdapter = MovieAdapter(
             onMovieClick = { movie ->
-                Toast.makeText(context, "Clicked: ${movie.title}", Toast.LENGTH_SHORT).show()
+                val bundle = Bundle().apply { putInt("movieId", movie.id) }
+                findNavController().navigate(R.id.action_global_detailsFragment, bundle)
             },
             onMovieLongClick = { movie ->
                 // Show "Remove" dialog
