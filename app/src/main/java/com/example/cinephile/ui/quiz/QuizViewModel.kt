@@ -3,6 +3,7 @@ package com.example.cinephile.ui.quiz
 import android.os.CountDownTimer
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cinephile.data.local.UserListEntity
 import com.example.cinephile.domain.model.Question
 import com.example.cinephile.domain.model.Quiz
 import com.example.cinephile.domain.repository.QuizRepository
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 sealed class QuizUiState {
     object Loading : QuizUiState()
     data class Error(val message: String) : QuizUiState()
+    data class ListSelection(val lists: List<UserListEntity>) : QuizUiState()
     data class Playing(
         val currentQuestionIndex: Int,
         val totalQuestions: Int,
@@ -38,13 +40,31 @@ class QuizViewModel(private val repository: QuizRepository) : ViewModel() {
     private val TIME_PER_QUESTION = 15000L // 15 Seconds per question
 
     init {
-        startNewQuiz()
+        loadLists()
     }
 
-    fun startNewQuiz() {
+    fun loadLists() {
         viewModelScope.launch {
             _uiState.value = QuizUiState.Loading
-            val result = repository.generateWatchlistQuiz()
+            val result = repository.getAllLists()
+
+            result.onSuccess { lists ->
+                if (lists.isEmpty()) {
+                    _uiState.value = QuizUiState.Error("No watchlists found. Create one first!")
+                } else {
+                    _uiState.value = QuizUiState.ListSelection(lists)
+                }
+            }.onFailure { e ->
+                _uiState.value = QuizUiState.Error(e.message ?: "Failed to load lists")
+            }
+        }
+    }
+
+    fun startQuizForList(list: UserListEntity) {
+        viewModelScope.launch {
+            _uiState.value = QuizUiState.Loading
+            // Fetch quiz from repository
+            val result = repository.generateQuizFromList(list.listId, list.name)
 
             result.onSuccess { quiz ->
                 currentQuiz = quiz
@@ -52,6 +72,7 @@ class QuizViewModel(private val repository: QuizRepository) : ViewModel() {
                 score = 0
                 emitQuestion()
             }.onFailure { e ->
+                // Show error but provide a way to go back to selection (by reloading lists)
                 _uiState.value = QuizUiState.Error(e.message ?: "Unknown error")
             }
         }
@@ -88,7 +109,6 @@ class QuizViewModel(private val repository: QuizRepository) : ViewModel() {
             score = score
         )
 
-        // 2. Start Timer
         startTimer()
     }
 
