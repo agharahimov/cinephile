@@ -2,6 +2,8 @@ package com.example.cinephile.data
 
 import com.example.cinephile.data.local.MovieDao
 import com.example.cinephile.data.local.MovieEntity
+import com.example.cinephile.data.local.UserListDao
+import com.example.cinephile.data.local.UserListEntity
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.model.Quiz
 import com.example.cinephile.domain.quiz.QuizGenerator
@@ -9,23 +11,36 @@ import com.example.cinephile.domain.repository.QuizRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-class QuizRepositoryImpl(private val movieDao: MovieDao) : QuizRepository {
+class QuizRepositoryImpl(private val movieDao: MovieDao,private val userListDao: UserListDao) : QuizRepository {
 
     private val generator = QuizGenerator()
 
-    override suspend fun generateWatchlistQuiz(): Result<Quiz> = withContext(Dispatchers.IO) {
+    // 1. Get all lists for the selection screen
+    override suspend fun getAllLists(): Result<List<UserListEntity>> = withContext(Dispatchers.IO) {
         try {
-            val entities = movieDao.getWatchlistMovies()
+            // Ensure default list exists (just in case)
+            val lists = userListDao.getAllLists()
+            Result.success(lists)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // 2. Generate quiz from specific list
+    override suspend fun generateQuizFromList(listId: Long, listName: String): Result<Quiz> = withContext(Dispatchers.IO) {
+        try {
+            // Use the new DAO method to get movies for this specific list
+            val entities = userListDao.getMoviesForList(listId)
 
             // Business Rule: Need at least 4 movies to make a good quiz
             if (entities.size < 4) {
-                return@withContext Result.failure(Exception("Not enough movies in watchlist (need at least 4)."))
+                return@withContext Result.failure(Exception("List '$listName' needs at least 4 movies to play."))
             }
 
             val movies = entities.map { it.toDomainModel() }
 
             // Generate the quiz
-            val quiz = generator.generateQuizFromMovies("Watchlist Challenge", movies)
+            val quiz = generator.generateQuizFromMovies("Quiz: $listName", movies)
                 ?: return@withContext Result.failure(Exception("Failed to generate quiz."))
 
             Result.success(quiz)

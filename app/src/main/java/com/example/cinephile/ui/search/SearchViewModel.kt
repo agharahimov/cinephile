@@ -21,7 +21,6 @@ class   SearchViewModel(
     private val _uiState = MutableStateFlow<SearchUiState>(SearchUiState.Idle)
     val uiState: StateFlow<SearchUiState> = _uiState
 
-
     private var searchJob: Job? = null
 
     fun searchMovies(query: String, searchType: SearchType = SearchType.TITLE) {

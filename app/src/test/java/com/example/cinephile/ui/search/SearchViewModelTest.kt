@@ -3,6 +3,7 @@ package com.example.cinephile.ui.search
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.repository.MovieRepository
+import com.example.cinephile.domain.repository.UserCollectionsRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -26,13 +27,16 @@ class SearchViewModelTest {
 
     private lateinit var viewModel: SearchViewModel
     private lateinit var mockMovieRepository: MovieRepository
+    private lateinit var mockuserRepo: UserCollectionsRepository
+
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
         mockMovieRepository = mock()
-        viewModel = SearchViewModel(mockMovieRepository)
+        mockuserRepo = mock()
+        viewModel = SearchViewModel(mockMovieRepository, mockuserRepo)
     }
 
     @After
