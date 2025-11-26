@@ -93,7 +93,15 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
                 Toast.makeText(context, "Added to default Watchlist", Toast.LENGTH_SHORT).show()
                 return@getUserLists
             }
+            // Case 2: Single List -> Direct Add
+            if (lists.size == 1) {
+                val list = lists[0]
+                viewModel.addMovieToSpecificList(movie, list.listId)
+                Toast.makeText(context, "Added to ${list.name}", Toast.LENGTH_SHORT).show()
+                return@getUserLists
+            }
 
+            // Case 3: Multiple Lists -> Show Dialog
             val listNames = lists.map { it.name }.toTypedArray()
 
             AlertDialog.Builder(requireContext())
