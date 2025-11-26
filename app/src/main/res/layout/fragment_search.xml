@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="?android:attr/colorBackground">
 
     <!-- 1. SEARCH BAR AREA -->
     <LinearLayout
@@ -23,8 +23,8 @@
             android:layout_weight="1"
             android:background="@drawable/bg_input_glass"
             android:hint="Search movies..."
-            android:textColor="@android:color/white"
-            android:textColorHint="#888888"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textColorHint="?android:attr/textColorSecondary"
             android:paddingStart="16dp"
             android:paddingEnd="16dp"
             android:inputType="text"
@@ -42,7 +42,7 @@
             android:text=""/>
     </LinearLayout>
 
-    <!-- 2. FILTER CHIPS (Updated for Single Selection Logic) -->
+    <!-- 2. FILTER CHIPS -->
     <HorizontalScrollView
         android:id="@+id/scrollFilters"
         android:layout_width="match_parent"
@@ -52,7 +52,6 @@
         android:scrollbars="none"
         app:layout_constraintTop_toBottomOf="@id/searchContainer">
 
-        <!-- Added singleSelection and selectionRequired -->
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/chipGroupFilters"
             android:layout_width="wrap_content"
@@ -61,7 +60,6 @@
             app:singleSelection="true"
             app:selectionRequired="true">
 
-            <!-- Changed Style to 'Choice' so they look like toggle buttons -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipTitle"
                 style="@style/Widget.MaterialComponents.Chip.Choice"
@@ -69,7 +67,8 @@
                 android:layout_height="wrap_content"
                 android:text="Title"
                 android:checked="true"
-                android:textColor="@android:color/white" />
+                android:textColor="?android:attr/textColorPrimary"
+                app:chipBackgroundColor="?attr/colorSurface"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipYear"
@@ -77,7 +76,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Year"
-                android:textColor="@android:color/white" />
+                android:textColor="?android:attr/textColorPrimary"
+                app:chipBackgroundColor="?attr/colorSurface"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipGenre"
@@ -85,7 +85,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Genre"
-                android:textColor="@android:color/white" />
+                android:textColor="?android:attr/textColorPrimary"
+                app:chipBackgroundColor="?attr/colorSurface"/>
 
             <com.google.android.material.chip.Chip
                 android:id="@+id/chipDirector"
@@ -93,7 +94,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Director"
-                android:textColor="@android:color/white" />
+                android:textColor="?android:attr/textColorPrimary"
+                app:chipBackgroundColor="?attr/colorSurface"/>
 
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
@@ -125,7 +127,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="No results found"
-        android:textColor="@android:color/white"
+        android:textColor="?android:attr/textColorPrimary"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

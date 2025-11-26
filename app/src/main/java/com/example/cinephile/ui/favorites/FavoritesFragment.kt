@@ -69,7 +69,7 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) { // Reusing Wat
                         rvList.visibility = View.GONE
                         layoutEmpty.visibility = View.VISIBLE
                         // Optional: Update empty text
-                        view.findViewById<TextView>(R.id.tvRecPlaceholder)?.text = "No favorites yet"
+
                     }
                     is WatchlistUiState.Success -> {
                         progressBar.visibility = View.GONE

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="?android:attr/colorBackground">
 
     <!-- 1. SCROLLABLE CONTENT -->
     <androidx.core.widget.NestedScrollView
@@ -33,7 +33,7 @@
                 android:alpha="0.7"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Gradient to fade backdrop into black -->
+            <!-- Gradient -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
@@ -48,6 +48,7 @@
                 android:layout_marginEnd="24dp"
                 app:cardCornerRadius="8dp"
                 app:cardElevation="8dp"
+                app:cardBackgroundColor="?attr/colorSurface"
                 app:layout_constraintBottom_toBottomOf="@id/ivBackdrop"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/ivBackdrop">
@@ -69,7 +70,7 @@
                 android:layout_marginEnd="16dp"
                 android:layout_marginTop="16dp"
                 android:text="Movie Title"
-                android:textColor="@color/white"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="24sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toStartOf="@id/cardPoster"
@@ -82,7 +83,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="2025 • Directed by..."
-                android:textColor="#BBBBBB"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"
                 android:layout_marginTop="4dp"
                 app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
@@ -110,7 +111,7 @@
                 android:layout_marginStart="24dp"
                 android:layout_marginEnd="24dp"
                 android:text="..."
-                android:textColor="#DDDDDD"
+                android:textColor="?android:attr/textColorPrimary"
                 android:lineSpacingExtra="6dp"
                 android:textSize="15sp"
                 app:layout_constraintTop_toBottomOf="@id/cardPoster" />
@@ -119,6 +120,7 @@
     </androidx.core.widget.NestedScrollView>
 
     <!-- BACK BUTTON (Fixed Top Left & Transparent) -->
+    <!-- Tint kept White because it sits on top of the Image -->
     <ImageButton
         android:id="@+id/btnBack"
         android:layout_width="48dp"
@@ -137,7 +139,7 @@
         android:layout_height="60dp"
         android:layout_margin="16dp"
         app:cardCornerRadius="30dp"
-        app:cardBackgroundColor="#2C3440"
+        app:cardBackgroundColor="?attr/colorSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -153,16 +155,17 @@
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/app_icon_transparent"
+                android:src="@drawable/logo_white"
                 android:scaleType="fitCenter"
-                android:adjustViewBounds="true"/>
+                android:adjustViewBounds="true"
+                app:tint="?android:attr/textColorSecondary"/>
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Rate, log, review, add to list..."
-                android:textColor="#BBBBBB"
+                android:textColor="?android:attr/textColorSecondary"
                 android:textSize="14sp"
                 android:layout_marginStart="12dp"/>
 
@@ -170,7 +173,7 @@
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@android:drawable/ic_menu_more"
-                app:tint="#BBBBBB"/>
+                app:tint="?android:attr/textColorSecondary"/>
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
