@@ -46,4 +46,11 @@ class WatchlistManagerViewModel(private val repository: UserCollectionsRepositor
             loadLists()
         }
     }
+
+    fun renameList(list: UserListEntity, newName: String) {
+        viewModelScope.launch {
+            repository.renameUserList(list.listId, newName)
+            loadLists() // Refresh UI
+        }
+    }
 }

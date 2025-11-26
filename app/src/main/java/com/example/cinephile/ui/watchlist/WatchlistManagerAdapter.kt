@@ -15,7 +15,7 @@ import com.example.cinephile.data.local.UserListEntity
 class WatchlistManagerAdapter(
     private val onListClick: (UserListEntity) -> Unit,
     private val onSetCurrent: (UserListEntity) -> Unit,
-    private val onLongClick: (UserListEntity) -> Unit
+    private val onMenuClick: (UserListEntity, View) -> Unit
 ) : ListAdapter<UserListEntity, WatchlistManagerAdapter.ListViewHolder>(ListDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ListViewHolder {
@@ -25,37 +25,39 @@ class WatchlistManagerAdapter(
     }
 
     override fun onBindViewHolder(holder: ListViewHolder, position: Int) {
-
-        holder.bind(getItem(position), onListClick, onSetCurrent, onLongClick)
+        holder.bind(getItem(position), onListClick, onSetCurrent, onMenuClick)
     }
 
     class ListViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvName: TextView = itemView.findViewById(R.id.tvListName)
         private val ivCurrent: ImageView = itemView.findViewById(R.id.ivCurrentStatus)
+        private val ivMore: ImageView = itemView.findViewById(R.id.ivMoreOptions)
 
         fun bind(list: UserListEntity,
                  onClick: (UserListEntity) -> Unit,
                  onSet: (UserListEntity) -> Unit,
-                 onLongClick: (UserListEntity) -> Unit) {
+                 onMenuClick: (UserListEntity, View) -> Unit) {
+
             tvName.text = list.name
 
-            // Visual Logic: Green if current, Gray if not
             if (list.isCurrent) {
                 ivCurrent.setImageResource(android.R.drawable.checkbox_on_background)
-                ivCurrent.setColorFilter(Color.parseColor("#03DAC5")) // Teal
+                ivCurrent.setColorFilter(Color.parseColor("#03DAC5"))
                 tvName.setTextColor(Color.parseColor("#03DAC5"))
             } else {
                 ivCurrent.setImageResource(android.R.drawable.radiobutton_off_background)
                 ivCurrent.setColorFilter(Color.GRAY)
                 tvName.setTextColor(Color.WHITE)
             }
-            itemView.setOnLongClickListener {
-                onLongClick(list)
-                true // Return true to indicate the click was consumed
-            }
 
+            // Click Listeners
             itemView.setOnClickListener { onClick(list) }
             ivCurrent.setOnClickListener { onSet(list) }
+
+            // 3-Dot Menu Click
+            ivMore.setOnClickListener {
+                onMenuClick(list, it) // Pass the view itself so PopupMenu knows where to open
+            }
         }
     }
 

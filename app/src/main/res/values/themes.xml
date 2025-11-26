@@ -24,4 +24,11 @@
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>
     </style>
+
+    <!-- Dark Theme Dialog Style -->
+    <style name="DarkDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
+        <item name="android:background">#1E1E1E</item> <!-- Dark Background -->
+        <item name="android:textColorPrimary">@color/white</item> <!-- White Text -->
+        <item name="colorAccent">#6200EE</item> <!-- Purple Buttons -->
+    </style>
 </resources>

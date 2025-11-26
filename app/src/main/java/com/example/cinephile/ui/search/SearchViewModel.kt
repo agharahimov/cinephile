@@ -2,6 +2,7 @@ package com.example.cinephile.ui.search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cinephile.data.local.UserListEntity
 import com.example.cinephile.domain.repository.MovieRepository
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -48,6 +49,31 @@ class   SearchViewModel(
             }
         }
     }
+
+    //list logic
+    // 1. Get all custom lists to show in the Dialog
+    fun getUserLists(onResult: (List<UserListEntity>) -> Unit) {
+        viewModelScope.launch {
+            // We assume getAllCustomLists returns Result<List<UserListEntity>>
+            val result = userRepo.getAllCustomLists()
+            result.onSuccess { lists ->
+                onResult(lists)
+            }.onFailure {
+                onResult(emptyList())
+            }
+        }
+    }
+
+    // 2. Add to a specific list ID
+    fun addMovieToSpecificList(movie: Movie, listId: Long) {
+        viewModelScope.launch {
+            // 1. Add to database (default watchlist logic)
+            userRepo.addMovieToWatchlist(movie)
+            // 2. Link to the specific custom list
+            userRepo.addMovieToCustomList(movie.id, listId)
+        }
+    }
+
     fun addToWatchlist(movie: Movie) {
         viewModelScope.launch {
             userRepo.addMovieToWatchlist(movie)

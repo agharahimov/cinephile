@@ -1,5 +1,6 @@
 package com.example.cinephile.ui.home
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -7,13 +8,12 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController // <--- IMPORT THIS
+import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
+import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.ui.ViewModelFactory
-import com.example.cinephile.ui.home.HomeUiState
-import com.example.cinephile.ui.home.HomeViewModel
 import com.example.cinephile.ui.search.MovieAdapter
 import kotlinx.coroutines.launch
 
@@ -30,31 +30,19 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. Variables
         rvTrending = view.findViewById(R.id.rvTrending)
         rvRecommendations = view.findViewById(R.id.rvRecommendations)
         pbTrending = view.findViewById(R.id.progressBar)
 
-        // 2. ViewModel
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
 
-        // ==============================================================
-        // 3. SETUP ADAPTERS (UPDATED CLICK LOGIC)
-        // ==============================================================
+        // --- UPDATED ADAPTER LOGIC ---
 
-        // --- TRENDING LIST ---
+        // Trending List
         trendingAdapter = MovieAdapter(
-            onMovieClick = { movie ->
-                openMovieDetails(movie.id)
-            },
-            onMovieLongClick = { movie ->
-                // 1. Save to Database
-                viewModel.addToWatchlist(movie)
-
-                // 2. Show Confirmation
-                Toast.makeText(requireContext(), "${movie.title} added to Watchlist", Toast.LENGTH_SHORT).show()
-            }
+            onMovieClick = { movie -> openMovieDetails(movie.id) },
+            onMovieLongClick = { movie -> showAddToListDialog(movie) } // Show Dialog
         )
 
         rvTrending.apply {
@@ -62,16 +50,10 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
-        // --- RECOMMENDATION LIST ---
+        // Recommendation List
         recommendationAdapter = MovieAdapter(
-            onMovieClick = { movie ->
-                openMovieDetails(movie.id)
-            },
-            onMovieLongClick = { movie ->
-                // Same logic for recommendations
-                viewModel.addToWatchlist(movie)
-                Toast.makeText(requireContext(), "${movie.title} added to Watchlist", Toast.LENGTH_SHORT).show()
-            }
+            onMovieClick = { movie -> openMovieDetails(movie.id) },
+            onMovieLongClick = { movie -> showAddToListDialog(movie) } // Show Dialog
         )
 
         rvRecommendations.apply {
@@ -79,7 +61,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
-        // 4. Observe Data (Same as before)
+        // (Rest of logic remains the same)
         lifecycleScope.launch {
             viewModel.trendingState.collect { state ->
                 if (state is HomeUiState.Success) {
@@ -98,12 +80,31 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         }
     }
 
-    // --- HELPER FUNCTION TO NAVIGATE ---
     private fun openMovieDetails(movieId: Int) {
-        val bundle = Bundle().apply {
-            putInt("movieId", movieId)
-        }
-        // Navigate using the Global Action we defined in nav_graph.xml
+        val bundle = Bundle().apply { putInt("movieId", movieId) }
         findNavController().navigate(R.id.action_global_detailsFragment, bundle)
+    }
+
+    // --- NEW HELPER FUNCTION ---
+    private fun showAddToListDialog(movie: Movie) {
+        viewModel.getUserLists { lists ->
+            if (lists.isEmpty()) {
+                viewModel.addToWatchlist(movie)
+                Toast.makeText(context, "Added to default Watchlist", Toast.LENGTH_SHORT).show()
+                return@getUserLists
+            }
+
+            val listNames = lists.map { it.name }.toTypedArray()
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Add to which list?")
+                .setItems(listNames) { _, which ->
+                    val selectedList = lists[which]
+                    viewModel.addMovieToSpecificList(movie, selectedList.listId)
+                    Toast.makeText(context, "Added to ${selectedList.name}", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
 }

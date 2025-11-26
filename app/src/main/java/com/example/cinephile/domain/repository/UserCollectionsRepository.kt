@@ -17,6 +17,7 @@ interface UserCollectionsRepository {
     suspend fun deleteUserList(listId: Long)
     suspend fun ensureDefaultListExists()
     suspend fun removeMovieFromList(movieId: Int, listId: Long)
+    suspend fun renameUserList(listId: Long, newName: String)
 
 
 

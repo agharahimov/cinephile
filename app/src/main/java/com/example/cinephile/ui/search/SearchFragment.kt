@@ -1,5 +1,6 @@
 package com.example.cinephile.ui.search
 
+import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -43,8 +44,7 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
             },
             onMovieLongClick = { movie ->
                 // --- LOGIC ADDED HERE ---
-                viewModel.addToWatchlist(movie)
-                Toast.makeText(context, "${movie.title} added to Watchlist", Toast.LENGTH_SHORT).show()
+                showAddToListDialog(movie)
             }
         )
 
@@ -121,6 +121,29 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
 
                 // Optional: Hide keyboard here
             }
+        }
+    }
+
+    private fun showAddToListDialog(movie: Movie) {
+        viewModel.getUserLists { lists ->
+            if (lists.isEmpty()) {
+                // If no lists, just add to default and notify
+                viewModel.addToWatchlist(movie)
+                Toast.makeText(context, "Added to default Watchlist", Toast.LENGTH_SHORT).show()
+                return@getUserLists
+            }
+
+            val listNames = lists.map { it.name }.toTypedArray()
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Add to which list?")
+                .setItems(listNames) { _, which ->
+                    val selectedList = lists[which]
+                    viewModel.addMovieToSpecificList(movie, selectedList.listId)
+                    Toast.makeText(context, "Added to ${selectedList.name}", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
     }
 }

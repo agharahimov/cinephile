@@ -2,6 +2,7 @@ package com.example.cinephile.ui.details
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cinephile.data.local.UserListEntity
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.repository.MovieRepository
 import com.example.cinephile.domain.repository.UserCollectionsRepository
@@ -87,6 +88,20 @@ class DetailsViewModel(
             // 2. ALWAYS update the UI state
             // Removed: if (_uiState.value.movie?.id == targetMovie.id)
             _uiState.value = _uiState.value.copy(isInWatchlist = !_uiState.value.isInWatchlist)
+        }
+    }
+
+    fun getUserLists(onResult: (List<UserListEntity>) -> Unit) {
+        viewModelScope.launch {
+            userRepo.getAllCustomLists().onSuccess { onResult(it) }
+        }
+    }
+
+    fun addMovieToSpecificList(movie: Movie, listId: Long) {
+        viewModelScope.launch {
+            userRepo.addMovieToWatchlist(movie)
+            userRepo.addMovieToCustomList(movie.id, listId)
+            checkDatabaseStatus(movie.id) // Refresh UI
         }
     }
 }

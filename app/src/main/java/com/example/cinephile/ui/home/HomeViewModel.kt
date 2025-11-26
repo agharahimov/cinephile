@@ -2,6 +2,7 @@ package com.example.cinephile.ui.home
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.cinephile.data.local.UserListEntity
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.repository.MovieRepository
 import com.example.cinephile.domain.repository.UserCollectionsRepository // <--- Import this
@@ -45,10 +46,22 @@ class HomeViewModel(
         }
     }
 
-    // --- NEW FUNCTION: Save to Watchlist ---
+    fun getUserLists(onResult: (List<UserListEntity>) -> Unit) {
+        viewModelScope.launch {
+            userRepo.getAllCustomLists().onSuccess { onResult(it) }
+        }
+    }
+
     fun addToWatchlist(movie: Movie) {
         viewModelScope.launch {
             userRepo.addMovieToWatchlist(movie)
+        }
+    }
+
+    fun addMovieToSpecificList(movie: Movie, listId: Long) {
+        viewModelScope.launch {
+            userRepo.addMovieToWatchlist(movie)
+            userRepo.addMovieToCustomList(movie.id, listId)
         }
     }
 }

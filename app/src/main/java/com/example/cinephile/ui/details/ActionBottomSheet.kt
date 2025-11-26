@@ -1,5 +1,6 @@
 package com.example.cinephile.ui.details
 
+import android.app.AlertDialog
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
@@ -116,8 +117,38 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         }
 
         btnWatchlist.setOnClickListener {
-            viewModel.toggleWatchlist(movieObj)
-            // Removed 'dismiss()' so you can see the "Added" checkmark appear
+            val uiState = viewModel.uiState.value
+
+            if (uiState.isInWatchlist) {
+                // Already added? Remove it.
+                viewModel.toggleWatchlist(movieObj)
+                Toast.makeText(context, "Removed from Watchlist", Toast.LENGTH_SHORT).show()
+            } else {
+                // Not added? Show selection dialog.
+                showAddToListDialog(movieObj)
+            }
+        }
+    }
+
+    private fun showAddToListDialog(movie: Movie) {
+        viewModel.getUserLists { lists ->
+            if (lists.isEmpty()) {
+                viewModel.toggleWatchlist(movie)
+                Toast.makeText(context, "Added to Default Watchlist", Toast.LENGTH_SHORT).show()
+                return@getUserLists
+            }
+
+            val listNames = lists.map { it.name }.toTypedArray()
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Add to which list?")
+                .setItems(listNames) { _, which ->
+                    val selectedList = lists[which]
+                    viewModel.addMovieToSpecificList(movie, selectedList.listId)
+                    Toast.makeText(context, "Added to ${selectedList.name}", Toast.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
         }
     }
 }

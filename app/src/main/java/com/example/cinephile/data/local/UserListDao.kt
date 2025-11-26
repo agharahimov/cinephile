@@ -49,4 +49,9 @@ interface UserListDao {
     // 2. Delete the connections (Movies inside that list)
     @Query("DELETE FROM user_list_movie_cross_ref WHERE listId = :listId")
     suspend fun deleteListContents(listId: Long)
+
+    // 3. rename the list
+    @Query("UPDATE user_lists SET name = :newName WHERE listId = :listId")
+    suspend fun renameList(listId: Long, newName: String)
 }
+
