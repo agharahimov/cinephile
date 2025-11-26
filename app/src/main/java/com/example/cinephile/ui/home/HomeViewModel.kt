@@ -52,6 +52,12 @@ class HomeViewModel(
         }
     }
 
+    fun addToWatchlist(movie: Movie) {
+        viewModelScope.launch {
+            userRepo.addMovieToWatchlist(movie)
+        }
+    }
+
     fun addMovieToSpecificList(movie: Movie, listId: Long) {
         viewModelScope.launch {
             userRepo.addMovieToWatchlist(movie)

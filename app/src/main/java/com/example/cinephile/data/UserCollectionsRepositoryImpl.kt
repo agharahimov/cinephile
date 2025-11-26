@@ -168,6 +168,10 @@ class UserCollectionsRepositoryImpl(
             userListDao.createList(UserListEntity(name = "My Watchlist", isCurrent = true))
         }
     }
+
+    override suspend fun renameUserList(listId: Long, newName: String) = withContext(Dispatchers.IO) {
+        userListDao.renameList(listId, newName)
+    }
 }
 
 // --- Mapper Functions ---

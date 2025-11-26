@@ -73,4 +73,10 @@ class   SearchViewModel(
             userRepo.addMovieToCustomList(movie.id, listId)
         }
     }
+
+    fun addToWatchlist(movie: Movie) {
+        viewModelScope.launch {
+            userRepo.addMovieToWatchlist(movie)
+        }
+    }
 }
