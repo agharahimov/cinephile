@@ -30,10 +30,35 @@ class UserCollectionsRepositoryImpl(
 
         // 3. Insert the final, correct entity in a single operation
         movieDao.insertOrUpdateMovie(entityToInsert)
+
+        // 4. Add to the Current List
+        var currentList = userListDao.getCurrentList()
+        if (currentList == null) {
+            val defaultId = userListDao.createList(UserListEntity(name = "My Watchlist", isCurrent = true))
+            currentList = UserListEntity(defaultId, "My Watchlist", true)
+        }
+        val join = UserListMovieCrossRef(listId = currentList.listId, movieId = movie.id)
+        userListDao.addMovieToList(join)
     }
 
+    // Fixed: Removed the erroneous 'listId' usage here
     override suspend fun removeMovieFromWatchlist(movieId: Int) = withContext(Dispatchers.IO) {
+
+        // 1. Find out which list is currently active (e.g., "Horror" or "My Watchlist")
+        val currentList = userListDao.getCurrentList()
+
+        if (currentList != null) {
+            // 2. DELETE the link between the movie and this list
+            userListDao.removeMovieFromList(currentList.listId, movieId)
+        }
+
+        // 3. Update the boolean flag on the movie itself (for UI consistency)
         movieDao.setMovieWatchlistStatus(movieId, inWatchlist = false)
+    }
+
+    // Added: Missing implementation for removing from a specific list
+    override suspend fun removeMovieFromList(movieId: Int, listId: Long) = withContext(Dispatchers.IO) {
+        userListDao.removeMovieFromList(listId, movieId)
     }
 
     override suspend fun getWatchlist(): Result<List<Movie>> = withContext(Dispatchers.IO) {
@@ -80,9 +105,6 @@ class UserCollectionsRepositoryImpl(
     }
 
     // --- Custom Lists Impl ---
-    // ... inside the UserCollectionsRepositoryImpl class ...
-
-// --- CUSTOM LISTS IMPLEMENTATION ---
 
     override suspend fun createCustomList(name: String): Result<Long> = withContext(Dispatchers.IO) {
         try {
@@ -119,10 +141,36 @@ class UserCollectionsRepositoryImpl(
         }
     }
 
+    // --- List Management ---
+
+    override suspend fun setCurrentList(listId: Long) = withContext(Dispatchers.IO) {
+        userListDao.updateCurrentList(listId)
+    }
+
+    override suspend fun getCurrentList(): UserListEntity? = withContext(Dispatchers.IO) {
+        userListDao.getCurrentList()
+    }
+
+    override suspend fun deleteUserList(listId: Long) = withContext(Dispatchers.IO) {
+        // 1. Remove all movies from this list first (Cleanup)
+        userListDao.deleteListContents(listId)
+        // 2. Delete the list itself
+        userListDao.deleteList(listId)
+
+        // Optional Safety: If they deleted the "Current" list, we should probably
+        // set the default list as current so the app doesn't get confused.
+        // But for now, simple deletion is fine.
+    }
+
+    override suspend fun ensureDefaultListExists() = withContext(Dispatchers.IO) {
+        val lists = userListDao.getAllLists()
+        if (lists.isEmpty()) {
+            userListDao.createList(UserListEntity(name = "My Watchlist", isCurrent = true))
+        }
+    }
 }
 
 // --- Mapper Functions ---
-// These private functions help convert between your Domain models and your Entity models.
 
 private fun Movie.toEntity(
     isInWatchlist: Boolean? = null,
@@ -131,24 +179,40 @@ private fun Movie.toEntity(
     return MovieEntity(
         id = this.id,
         title = this.title,
-        posterPath = this.posterUrl.substringAfterLast('/'), // Extract path from full URL
+        posterPath = this.posterUrl,
         overview = this.overview,
         backdropPath = this.backdropUrl,
         releaseDate = this.releaseDate,
-        // Use the passed in status, or default to false
+        voteAverage = this.rating,
         isInWatchlist = isInWatchlist ?: false,
         isLiked = isLiked ?: false
     )
 }
 
 private fun MovieEntity.toDomainModel(): Movie {
+    val posterBase = "https://image.tmdb.org/t/p/w500"
+    val backdropBase = "https://image.tmdb.org/t/p/w780"
+
+    val fixedPosterUrl = if (this.posterPath?.startsWith("http") == true) {
+        this.posterPath
+    } else {
+        "$posterBase${this.posterPath}"
+    }
+
+    val fixedBackdropUrl = if (this.backdropPath?.startsWith("http") == true) {
+        this.backdropPath
+    } else {
+        "$backdropBase${this.backdropPath}"
+    }
+
     return Movie(
         id = this.id,
         title = this.title,
-        // Rebuild the full URL for the domain model
-        posterUrl = "https://image.tmdb.org/t/p/w500${this.posterPath}",
-        overview = this.overview,
-        backdropUrl = this.backdropPath ?: this.posterPath ?: "",
-        releaseDate = this.releaseDate
+        posterUrl = fixedPosterUrl ?: "",
+        backdropUrl = fixedBackdropUrl ?: "",
+        overview = "",
+        releaseDate = this.releaseDate,
+        rating = this.voteAverage,
+        director = ""
     )
 }
