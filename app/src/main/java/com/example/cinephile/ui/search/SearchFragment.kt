@@ -133,6 +133,15 @@ class SearchFragment : Fragment(R.layout.fragment_search) {
                 return@getUserLists
             }
 
+            // Case 2: Only ONE list exists? Add directly (Skip Dialog)
+            if (lists.size == 1) {
+                val list = lists[0]
+                viewModel.addMovieToSpecificList(movie, list.listId)
+                Toast.makeText(context, "Added to ${list.name}", Toast.LENGTH_SHORT).show()
+                return@getUserLists
+            }
+
+            // Case 3: Multiple lists? Show the Dialog.
             val listNames = lists.map { it.name }.toTypedArray()
 
             AlertDialog.Builder(requireContext())
