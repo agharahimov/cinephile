@@ -60,4 +60,26 @@
         android:layout_marginTop="8dp"
         android:layout_marginStart="8dp"/>
 
+    <!-- Space to push button down (Optional) -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <!-- DYNAMIC AUTH BUTTON (Log In / Log Out) -->
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnAuthAction"
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:text="Log Out"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:cornerRadius="12dp"
+        app:elevation="6dp"
+
+        android:textColor="?attr/colorOnPrimary"
+        app:backgroundTint="?attr/colorPrimary"
+
+        android:layout_marginBottom="16dp"/>
+
 </LinearLayout>
