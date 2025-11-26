@@ -1,5 +1,7 @@
 package com.example.cinephile
 
+
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -7,6 +9,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -19,6 +22,15 @@ class MainActivity : AppCompatActivity() {
     private var tvSubtitle: TextView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        val sharedPref = getSharedPreferences("AppSettings", Context.MODE_PRIVATE)
+        val isDarkMode = sharedPref.getBoolean("IS_DARK_MODE", true)
+
+        if (isDarkMode) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
         // 1. Splash Screen Logic
         val splashScreen = installSplashScreen()
         var keepSplashOnScreen = true

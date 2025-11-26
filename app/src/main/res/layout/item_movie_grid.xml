@@ -7,7 +7,7 @@
     android:layout_marginEnd="12dp"
     android:layout_marginBottom="8dp"
     app:cardCornerRadius="12dp"
-    app:cardBackgroundColor="#1E1E1E">
+    app:cardBackgroundColor="?attr/colorSurface">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -50,7 +50,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Movie Title"
-            android:textColor="@android:color/white"
+            android:textColor="?android:attr/textColorPrimary"
             android:textStyle="bold"
             android:textSize="13sp"
             android:maxLines="1"
@@ -68,7 +68,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="10 Nov 2025"
-            android:textColor="#AAAAAA"
+            android:textColor="?android:attr/textColorSecondary"
             android:textSize="11sp"
             android:paddingStart="8dp"
             android:paddingEnd="8dp"

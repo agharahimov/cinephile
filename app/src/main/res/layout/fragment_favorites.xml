@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/black">
+    android:background="?android:attr/colorBackground">
 
     <!-- HEADER -->
     <TextView
@@ -13,7 +13,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Your Favorites"
-        android:textColor="@android:color/white"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="28sp"
         android:textStyle="bold"
         android:layout_marginStart="16dp"
@@ -51,13 +51,13 @@
             android:layout_width="80dp"
             android:layout_height="80dp"
             android:src="@android:drawable/btn_star_big_on"
-            app:tint="#333333" />
+            app:tint="?android:attr/textColorSecondary" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="No favorites yet"
-            android:textColor="#AAAAAA"
+            android:textColor="?android:attr/textColorSecondary"
             android:textSize="18sp"
             android:layout_marginTop="16dp"/>
 
@@ -65,7 +65,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Like movies to save them here."
-            android:textColor="#666666"
+            android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
             android:layout_marginTop="8dp"/>
     </LinearLayout>
