@@ -4,6 +4,7 @@ import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
@@ -33,6 +34,8 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
         rvTrending = view.findViewById(R.id.rvTrending)
         rvRecommendations = view.findViewById(R.id.rvRecommendations)
         pbTrending = view.findViewById(R.id.progressBar)
+
+        val tvRecPlaceholder = view.findViewById<TextView>(R.id.tvRecPlaceholder)
 
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
@@ -73,8 +76,21 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
 
         lifecycleScope.launch {
             viewModel.recommendationState.collect { state ->
-                if (state is HomeUiState.Success) {
-                    recommendationAdapter.submitList(state.movies)
+                when (state) {
+                    is HomeUiState.Success -> {
+                        rvRecommendations.visibility = View.VISIBLE
+                        tvRecPlaceholder.visibility = View.GONE
+                        recommendationAdapter.submitList(state.movies)
+                    }
+                    is HomeUiState.Error -> {
+                        // Hide List, Show Message
+                        rvRecommendations.visibility = View.GONE
+                        tvRecPlaceholder.visibility = View.VISIBLE
+                        tvRecPlaceholder.text = state.message
+                    }
+                    is HomeUiState.Loading -> {
+                        // Optional: Show a specific loader for this row if you want
+                    }
                 }
             }
         }
