@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 1. STATE: SELECTED (Text becomes White) -->
+    <item android:state_checked="true" android:color="@android:color/white" />
+
+    <!-- 2. STATE: DEFAULT (Text matches your Theme) -->
+    <item android:color="?android:attr/textColorPrimary" />
+</selector>

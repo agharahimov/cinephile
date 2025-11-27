@@ -26,6 +26,9 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
     private lateinit var viewModel: DetailsViewModel
     private lateinit var movieObj: Movie
 
+    // OPTION 2 IMPLEMENTATION: Track if we showed the message
+    private var hasShownRatingToast = false
+
     companion object {
         fun newInstance(movie: Movie): ActionBottomSheet {
             val args = Bundle()
@@ -67,6 +70,7 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(requireParentFragment(), factory)[DetailsViewModel::class.java]
         viewModel.checkDatabaseStatus(movieObj.id)
+
         // UI References
         view.findViewById<TextView>(R.id.tvSheetTitle).text = movieObj.title
         view.findViewById<TextView>(R.id.tvSheetYear).text = movieObj.releaseDate.take(4)
@@ -81,16 +85,20 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
 
         val ratingBar = view.findViewById<RatingBar>(R.id.ratingBarSheet)
 
+        // --- RATING LISTENER (UPDATED) ---
         ratingBar.setOnRatingBarChangeListener { _, rating, fromUser ->
             if (fromUser) {
                 // 1. Create copy with new rating
                 val ratedMovie = movieObj.copy(userRating = rating.toDouble())
 
-                // 2. Call ViewModel
+                // 2. Call ViewModel (Always save to DB)
                 viewModel.rateMovie(ratedMovie)
 
-                // 3. Feedback
-                Toast.makeText(context, "Rated $rating stars & Added to Watchlist", Toast.LENGTH_SHORT).show()
+                // 3. Feedback (Only show ONCE)
+                if (!hasShownRatingToast) {
+                    Toast.makeText(context, "Rated $rating stars & Added to Watchlist", Toast.LENGTH_SHORT).show()
+                    hasShownRatingToast = true // Lock it so it doesn't show again while dragging
+                }
             }
         }
 
@@ -104,13 +112,11 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
 
                 // --- UPDATE LIKE VISUALS ---
                 if (state.isFavorite) {
-                    // YELLOW / GOLD
                     ivLike.setImageResource(android.R.drawable.star_big_on)
                     ivLike.imageTintList = ColorStateList.valueOf(Color.parseColor("#FFD700"))
                     tvLike.text = "Liked"
                     tvLike.setTextColor(Color.parseColor("#FFD700"))
                 } else {
-                    // GREY
                     ivLike.setImageResource(android.R.drawable.btn_star)
                     ivLike.imageTintList = ColorStateList.valueOf(Color.parseColor("#99AABB"))
                     tvLike.text = "Like"
@@ -119,13 +125,11 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
 
                 // --- UPDATE WATCHLIST VISUALS ---
                 if (state.isInWatchlist) {
-                    // TEAL / TICK
                     ivWatchlist.setImageResource(R.drawable.ic_check)
                     ivWatchlist.imageTintList = ColorStateList.valueOf(Color.parseColor("#03DAC5"))
                     tvWatchlist.text = "Added"
                     tvWatchlist.setTextColor(Color.parseColor("#03DAC5"))
                 } else {
-                    // GREY / PLUS
                     ivWatchlist.setImageResource(android.R.drawable.ic_input_add)
                     ivWatchlist.imageTintList = ColorStateList.valueOf(Color.parseColor("#99AABB"))
                     tvWatchlist.text = "Watchlist"
