@@ -1,5 +1,6 @@
 package com.example.cinephile.data
 
+import android.util.Log
 import com.example.cinephile.BuildConfig
 import com.example.cinephile.data.local.MovieDao
 import com.example.cinephile.data.local.MovieEntity
@@ -217,6 +218,13 @@ class UserCollectionsRepositoryImpl(
             // Combine and remove duplicates
             val seedMovies = (liked + rated).distinctBy { it.id }
 
+            // --- LOGGING START ---
+            Log.d("RecEngine", "Analyzing Profile: Found ${seedMovies.size} liked/rated movies.")
+            if (seedMovies.isNotEmpty()) {
+                Log.d("RecEngine", "Sample Movie Genres: ${seedMovies[0].genres}")
+            }
+            // --- LOGGING END ---
+
             // 2. BUILD PROFILE: If no data, return empty (or handle in ViewModel)
             if (seedMovies.isEmpty()) {
                 return@withContext Result.success(emptyList())
@@ -239,6 +247,11 @@ class UserCollectionsRepositoryImpl(
 
             // Get Top 2 Genres
             val topGenres = genreCounts.entries.sortedByDescending { it.value }.take(2).map { it.key }
+
+            // --- LOGGING ---
+            Log.d("RecEngine", "Top Genres Detected: $topGenres")
+            // --- LOGGING ---
+
             if (topGenres.isEmpty()) return@withContext Result.success(emptyList())
 
             val primaryGenre = topGenres[0]
@@ -278,6 +291,10 @@ class UserCollectionsRepositoryImpl(
                 .shuffled() // Shuffle to mix the strategies
                 .take(20)   // Limit to 20 items
 
+            // --- LOGGING ---
+            Log.d("RecEngine", "Generated ${finallist.size} recommendations.")
+            // --- LOGGING ---
+
             Result.success(finallist)
 
         } catch (e: Exception) {
@@ -287,20 +304,6 @@ class UserCollectionsRepositoryImpl(
 }
 
 // --- Mapper Functions ---
-
-private fun MovieDto.toDomainModel(): Movie? {
-    if (this.posterPath == null) return null
-    return Movie(
-        id = this.id,
-        title = this.title,
-        posterUrl = "https://image.tmdb.org/t/p/w500${this.posterPath}",
-        backdropUrl = if (this.backdropPath != null) "https://image.tmdb.org/t/p/w780${this.backdropPath}" else "https://image.tmdb.org/t/p/w500${this.posterPath}",
-        overview = this.overview ?: "",
-        releaseDate = this.releaseDate ?: "",
-        rating = this.voteAverage ?: 0.0,
-        genres = this.genreIds ?: emptyList()
-    )
-}
 private fun Movie.toEntity(
     isInWatchlist: Boolean? = null,
     isLiked: Boolean? = null
@@ -348,5 +351,24 @@ private fun MovieEntity.toDomainModel(): Movie {
         director = "",
         genres = if (this.genres.isNotEmpty()) this.genres.split(",").mapNotNull { it.toIntOrNull() } else emptyList(),
         userRating = this.userRating
+    )
+}
+
+// 3. DTO -> Movie (For API Responses in Recommendation Engine)
+private fun MovieDto.toDomainModel(): Movie? {
+    if (this.posterPath == null) return null
+    val posterBase = "https://image.tmdb.org/t/p/w500"
+    val backdropBase = "https://image.tmdb.org/t/p/w780"
+
+    return Movie(
+        id = this.id,
+        title = this.title,
+        posterUrl = "$posterBase${this.posterPath}",
+        backdropUrl = if (this.backdropPath != null) "$backdropBase${this.backdropPath}" else "$posterBase${this.posterPath}",
+        overview = this.overview ?: "",
+        releaseDate = this.releaseDate ?: "",
+        rating = this.voteAverage ?: 0.0,
+        // Map Genre IDs directly
+        genres = this.genreIds ?: emptyList()
     )
 }
