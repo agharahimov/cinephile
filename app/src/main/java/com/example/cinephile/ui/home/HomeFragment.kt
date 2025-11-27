@@ -58,6 +58,11 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             onMovieClick = { movie -> openMovieDetails(movie.id) },
             onMovieLongClick = { movie -> showAddToListDialog(movie) } // Show Dialog
         )
+        val btnRecs = view.findViewById<View>(R.id.btnOpenRecommendations)
+
+        btnRecs.setOnClickListener {
+            findNavController().navigate(R.id.action_homeFragment_to_recommendationFragment)
+        }
 
         rvRecommendations.apply {
             adapter = recommendationAdapter

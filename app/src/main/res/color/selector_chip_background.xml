@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- 1. STATE: SELECTED (Purple) -->
+    <item android:state_checked="true" android:color="#6200EE" />
+
+    <!-- 2. STATE: DEFAULT (Surface/Grey) -->
+    <!-- Using a slightly darker color than pure surface so they look clickable -->
+    <item android:color="#33888888" />
+</selector>

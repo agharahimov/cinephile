@@ -1,7 +1,10 @@
 package com.example.cinephile.ui.favorites
 
 import android.app.AlertDialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import android.widget.*
 import androidx.fragment.app.Fragment
@@ -16,7 +19,7 @@ import com.example.cinephile.ui.search.MovieAdapter
 import com.example.cinephile.ui.watchlist.WatchlistUiState
 import kotlinx.coroutines.launch
 
-class FavoritesFragment : Fragment(R.layout.fragment_favorites) { // Reusing Watchlist Layout
+class FavoritesFragment : Fragment(R.layout.fragment_favorites) {
 
     private lateinit var viewModel: FavoritesViewModel
     private lateinit var movieAdapter: MovieAdapter
@@ -24,7 +27,7 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) { // Reusing Wat
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Change Header Text since we are reusing layout
+        // Change Header Text
         view.findViewById<TextView>(R.id.tvHeader).text = "Your Favorites"
 
         val factory = ViewModelFactory(requireContext().applicationContext)
@@ -40,20 +43,45 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) { // Reusing Wat
                 findNavController().navigate(R.id.action_global_detailsFragment, bundle)
             },
             onMovieLongClick = { movie ->
-                // Show "Remove" dialog
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Remove Movie")
-                    .setMessage("Remove '${movie.title}' from Favorites?")
-                    .setPositiveButton("Yes") { _, _ ->
-                        viewModel.removeFromFavorites(movie)
-                        Toast.makeText(context, "Removed", Toast.LENGTH_SHORT).show()
-                    }
-                    .setNegativeButton("No", null)
-                    .show()
+                // --- CUSTOM DARK DIALOG LOGIC ---
+
+                // 1. Inflate the custom view
+                val dialogView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.dialog_custom_confirm, null)
+
+                // 2. Create the Dialog
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .create()
+
+                // 3. Make background transparent (for rounded corners)
+                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                // 4. Setup Text
+                dialogView.findViewById<TextView>(R.id.tvDialogTitle).text = "Remove Favorite"
+                dialogView.findViewById<TextView>(R.id.tvDialogMessage).text =
+                    "Remove '${movie.title}' from your favorites?"
+
+                // 5. Setup Buttons
+                val btnCancel = dialogView.findViewById<View>(R.id.btnDialogCancel)
+                val btnConfirm = dialogView.findViewById<View>(R.id.btnDialogConfirm)
+
+                btnCancel.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                btnConfirm.setOnClickListener {
+                    // Perform Delete Action
+                    viewModel.removeFromFavorites(movie)
+                    Toast.makeText(context, "Removed from Favorites", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+
+                dialog.show()
             }
         )
 
-        rvList.layoutManager = GridLayoutManager(context, 3)
+        rvList.layoutManager = GridLayoutManager(context, 2)
         rvList.adapter = movieAdapter
 
         lifecycleScope.launch {
@@ -68,8 +96,6 @@ class FavoritesFragment : Fragment(R.layout.fragment_favorites) { // Reusing Wat
                         progressBar.visibility = View.GONE
                         rvList.visibility = View.GONE
                         layoutEmpty.visibility = View.VISIBLE
-                        // Optional: Update empty text
-
                     }
                     is WatchlistUiState.Success -> {
                         progressBar.visibility = View.GONE

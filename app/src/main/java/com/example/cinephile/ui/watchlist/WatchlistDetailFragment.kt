@@ -1,8 +1,12 @@
 package com.example.cinephile.ui.watchlist
 
 import android.app.AlertDialog
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.TextView
@@ -18,23 +22,21 @@ import com.example.cinephile.ui.ViewModelFactory
 import com.example.cinephile.ui.search.MovieAdapter
 import kotlinx.coroutines.launch
 
-// RENAME: This is now WatchlistDetailFragment
 class WatchlistDetailFragment : Fragment(R.layout.fragment_watchlist) {
 
     private lateinit var viewModel: WatchlistViewModel
     private lateinit var movieAdapter: MovieAdapter
 
-    // VARIABLE: To track which list we are looking at
     private var currentListId: Long = 0L
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // 1. GET ARGUMENTS (Passed from the Manager Screen)
+        // 1. GET ARGUMENTS
         currentListId = arguments?.getLong("listId") ?: 0L
         val listName = arguments?.getString("listName") ?: "Watchlist"
 
-        // 2. Set the Header Title (e.g. "Horror Movies")
+        // 2. Set Title
         view.findViewById<TextView>(R.id.tvHeader).text = listName
 
         // 3. Setup ViewModel
@@ -46,31 +48,52 @@ class WatchlistDetailFragment : Fragment(R.layout.fragment_watchlist) {
         val layoutEmpty = view.findViewById<LinearLayout>(R.id.layoutEmptyState)
         val progressBar = view.findViewById<ProgressBar>(R.id.progressBar)
 
-        // 5. Setup Adapter (Your existing logic)
+        // 5. Setup Adapter
         movieAdapter = MovieAdapter(
             onMovieClick = { movie ->
                 val bundle = Bundle().apply { putInt("movieId", movie.id) }
                 findNavController().navigate(R.id.action_global_detailsFragment, bundle)
             },
             onMovieLongClick = { movie ->
-                AlertDialog.Builder(requireContext())
-                    .setTitle("Remove Movie")
-                    .setMessage("Remove '${movie.title}' from this list?")
-                    .setPositiveButton("Yes") { _, _ ->
+                // --- NEW CUSTOM DIALOG LOGIC ---
 
-                        // --- FIX: Pass 'currentListId' here ---
-                        viewModel.removeFromWatchlist(movie, currentListId)
+                // 1. Inflate custom layout
+                val dialogView = LayoutInflater.from(requireContext())
+                    .inflate(R.layout.dialog_custom_confirm, null)
 
-                        Toast.makeText(context, "Removed", Toast.LENGTH_SHORT).show()
+                // 2. Build Dialog
+                val dialog = AlertDialog.Builder(requireContext())
+                    .setView(dialogView)
+                    .create()
 
-                        // (You don't need to call loadCustomList here anymore because
-                        // the ViewModel does it automatically now)
-                    }
-                    .setNegativeButton("No", null)
-                    .show()
+                // 3. Transparent background for rounded corners
+                dialog.window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+
+                // 4. Set Text
+                dialogView.findViewById<TextView>(R.id.tvDialogTitle).text = "Remove Movie"
+                dialogView.findViewById<TextView>(R.id.tvDialogMessage).text =
+                    "Remove '${movie.title}' from this list?"
+
+                // 5. Handle Buttons
+                val btnCancel = dialogView.findViewById<View>(R.id.btnDialogCancel)
+                val btnConfirm = dialogView.findViewById<View>(R.id.btnDialogConfirm)
+
+                btnCancel.setOnClickListener {
+                    dialog.dismiss()
+                }
+
+                btnConfirm.setOnClickListener {
+                    // Perform Delete (pass currentListId to remove from THIS list specifically)
+                    viewModel.removeFromWatchlist(movie, currentListId)
+                    Toast.makeText(context, "Removed", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                }
+
+                dialog.show()
             }
         )
 
+        // 3 Columns (Matches your previous preference)
         rvWatchlist.layoutManager = GridLayoutManager(context, 3)
         rvWatchlist.adapter = movieAdapter
 
@@ -101,7 +124,6 @@ class WatchlistDetailFragment : Fragment(R.layout.fragment_watchlist) {
 
     override fun onResume() {
         super.onResume()
-        // CRITICAL CHANGE: Load the specific custom list, not just the default one
         viewModel.loadCustomList(currentListId)
     }
 }

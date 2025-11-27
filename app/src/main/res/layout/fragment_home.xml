@@ -40,17 +40,38 @@
             tools:listitem="@layout/item_movie_grid"/>
 
         <!-- SECTION 2: RECOMMENDATIONS -->
-        <TextView
-            android:id="@+id/tvRecTitle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/btnOpenRecommendations"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Recommended For You"
-            android:textColor="?android:attr/textColorPrimary"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="12dp"/>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:padding="16dp"
+            android:background="?attr/selectableItemBackground"
+            android:layout_marginTop="16dp">
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/tvRecTitle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Recommended For You"
+                android:textColor="@android:color/white"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <!-- The Arrow Button -->
+            <ImageView
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:src="@drawable/ic_arrow_right"
+                android:padding="6dp"
+                android:background="@drawable/bg_circle_transparent"
+                app:tint="#BBBBBB" />
+            <!-- Make sure bg_circle_transparent exists, or remove background -->
+
+        </LinearLayout>
 
         <!-- Horizontal List for Recommendations -->
         <androidx.recyclerview.widget.RecyclerView
