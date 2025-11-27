@@ -8,7 +8,7 @@ import com.example.cinephile.data.local.UserListDao
 import com.example.cinephile.data.local.UserListEntity
 import com.example.cinephile.data.local.UserListMovieCrossRef
 import com.example.cinephile.data.remote.MovieDto
-import com.example.cinephile.data.remote.RetrofitClient.apiService
+import com.example.cinephile.data.remote.RetrofitClient
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.repository.UserCollectionsRepository
 import kotlinx.coroutines.Dispatchers
@@ -19,48 +19,42 @@ class UserCollectionsRepositoryImpl(
     private val userListDao: UserListDao
 ) : UserCollectionsRepository {
 
+    // Access API Service for Recommendations
+    private val apiService = RetrofitClient.apiService
+
     // --- Watchlist Impl ---
     override suspend fun addMovieToWatchlist(movie: Movie) = withContext(Dispatchers.IO) {
-        // 1. Check if the movie already exists in the database
+        // 1. Upsert Movie to DB
         val existingEntity = movieDao.getMovieById(movie.id)
-
         val entityToInsert = if (existingEntity != null) {
-            // 2a. If it exists, create a copy but set isInWatchlist to true
             existingEntity.copy(isInWatchlist = true)
         } else {
-            // 2b. If it's new, convert the domain model to an entity and set isInWatchlist to true
             movie.toEntity().copy(isInWatchlist = true)
         }
-
-        // 3. Insert the final, correct entity in a single operation
         movieDao.insertOrUpdateMovie(entityToInsert)
 
-        // 4. Add to the Current List
-        var currentList = userListDao.getCurrentList()
-        if (currentList == null) {
-            val defaultId = userListDao.createList(UserListEntity(name = "My Watchlist", isCurrent = true))
-            currentList = UserListEntity(defaultId, "My Watchlist", true)
-        }
-        val join = UserListMovieCrossRef(listId = currentList.listId, movieId = movie.id)
-        userListDao.addMovieToList(join)
-    }
-
-    // Fixed: Removed the erroneous 'listId' usage here
-    override suspend fun removeMovieFromWatchlist(movieId: Int) = withContext(Dispatchers.IO) {
-
-        // 1. Find out which list is currently active (e.g., "Horror" or "My Watchlist")
+        // 2. Add to Default List ("My Watchlist")
+        // We ensure a default list exists so queries always work
+        ensureDefaultListExists()
         val currentList = userListDao.getCurrentList()
+            ?: userListDao.getAllLists().firstOrNull() // Fallback if no current set
 
         if (currentList != null) {
-            // 2. DELETE the link between the movie and this list
+            val join = UserListMovieCrossRef(listId = currentList.listId, movieId = movie.id)
+            userListDao.addMovieToList(join)
+        }
+    }
+
+    override suspend fun removeMovieFromWatchlist(movieId: Int) = withContext(Dispatchers.IO) {
+        // Remove from Default List
+        val currentList = userListDao.getCurrentList()
+        if (currentList != null) {
             userListDao.removeMovieFromList(currentList.listId, movieId)
         }
-
-        // 3. Update the boolean flag on the movie itself (for UI consistency)
+        // Update Movie Status
         movieDao.setMovieWatchlistStatus(movieId, inWatchlist = false)
     }
 
-    // Added: Missing implementation for removing from a specific list
     override suspend fun removeMovieFromList(movieId: Int, listId: Long) = withContext(Dispatchers.IO) {
         userListDao.removeMovieFromList(listId, movieId)
     }
@@ -81,13 +75,11 @@ class UserCollectionsRepositoryImpl(
     // --- Liked Movies Impl ---
     override suspend fun likeMovie(movie: Movie) = withContext(Dispatchers.IO) {
         val existingEntity = movieDao.getMovieById(movie.id)
-
         val entityToInsert = if (existingEntity != null) {
             existingEntity.copy(isLiked = true)
         } else {
             movie.toEntity().copy(isLiked = true)
         }
-
         movieDao.insertOrUpdateMovie(entityToInsert)
     }
 
@@ -109,7 +101,6 @@ class UserCollectionsRepositoryImpl(
     }
 
     // --- Custom Lists Impl ---
-
     override suspend fun createCustomList(name: String): Result<Long> = withContext(Dispatchers.IO) {
         try {
             if (name.isBlank()) {
@@ -146,7 +137,6 @@ class UserCollectionsRepositoryImpl(
     }
 
     // --- List Management ---
-
     override suspend fun setCurrentList(listId: Long) = withContext(Dispatchers.IO) {
         userListDao.updateCurrentList(listId)
     }
@@ -156,14 +146,8 @@ class UserCollectionsRepositoryImpl(
     }
 
     override suspend fun deleteUserList(listId: Long) = withContext(Dispatchers.IO) {
-        // 1. Remove all movies from this list first (Cleanup)
         userListDao.deleteListContents(listId)
-        // 2. Delete the list itself
         userListDao.deleteList(listId)
-
-        // Optional Safety: If they deleted the "Current" list, we should probably
-        // set the default list as current so the app doesn't get confused.
-        // But for now, simple deletion is fine.
     }
 
     override suspend fun ensureDefaultListExists() = withContext(Dispatchers.IO) {
@@ -177,23 +161,22 @@ class UserCollectionsRepositoryImpl(
         userListDao.renameList(listId, newName)
     }
 
+    // --- Ratings Impl ---
     override suspend fun setUserRating(movie: Movie, rating: Double) = withContext(Dispatchers.IO) {
         val existingEntity = movieDao.getMovieById(movie.id)
-
         val entityToInsert = if (existingEntity != null) {
-            // Update rating, preserve other flags
-            // REQUIREMENT: Rating a movie adds it to watchlist automatically
             existingEntity.copy(userRating = rating, isInWatchlist = true)
         } else {
-            // New movie: Set rating and set watchlist to true
             movie.toEntity().copy(userRating = rating, isInWatchlist = true)
         }
         movieDao.insertOrUpdateMovie(entityToInsert)
 
-        // Ensure it's added to the current watchlist relation table too
-        val currentList = userListDao.getCurrentList() ?: return@withContext
-        val join = UserListMovieCrossRef(listId = currentList.listId, movieId = movie.id)
-        userListDao.addMovieToList(join)
+        // Add to current list as well
+        val currentList = userListDao.getCurrentList() ?: userListDao.getAllLists().firstOrNull()
+        if (currentList != null) {
+            val join = UserListMovieCrossRef(listId = currentList.listId, movieId = movie.id)
+            userListDao.addMovieToList(join)
+        }
     }
 
     override suspend fun getUserRatedMovies(): Result<List<Movie>> = withContext(Dispatchers.IO) {
@@ -206,104 +189,93 @@ class UserCollectionsRepositoryImpl(
     }
 
     override suspend fun getUserRating(movieId: Int): Double = withContext(Dispatchers.IO) {
-        // Return the rating if movie exists, otherwise 0.0
         movieDao.getMovieById(movieId)?.userRating ?: 0.0
     }
 
+    // --- RECOMMENDATION ENGINE ---
     override suspend fun getPersonalizedRecommendations(): Result<List<Movie>> = withContext(Dispatchers.IO) {
         try {
-            // 1. GATHER DATA: Get all Liked or Rated movies
+            // 1. Gather Data
             val liked = movieDao.getLikedMovies()
             val rated = movieDao.getRatedMovies()
-            // Combine and remove duplicates
             val seedMovies = (liked + rated).distinctBy { it.id }
 
-            // --- LOGGING START ---
-            Log.d("RecEngine", "Analyzing Profile: Found ${seedMovies.size} liked/rated movies.")
-            if (seedMovies.isNotEmpty()) {
-                Log.d("RecEngine", "Sample Movie Genres: ${seedMovies[0].genres}")
-            }
-            // --- LOGGING END ---
+            // Log Data
+            Log.d("RecEngine", "=== START GENERATION ===")
+            Log.d("RecEngine", "Sources: ${liked.size} Liked, ${rated.size} Rated.")
 
-            // 2. BUILD PROFILE: If no data, return empty (or handle in ViewModel)
             if (seedMovies.isEmpty()) {
+                Log.d("RecEngine", "Profile empty.")
                 return@withContext Result.success(emptyList())
             }
 
-            // Analyze Genres (Count occurrences)
+            // 2. Score Genres
             val genreCounts = mutableMapOf<Int, Int>()
             seedMovies.forEach { movie ->
-                // Parse the "12,28" string back to a list
                 if (movie.genres.isNotBlank()) {
                     val ids = movie.genres.split(",").mapNotNull { it.toIntOrNull() }
                     ids.forEach { id ->
-                        val current = genreCounts.getOrDefault(id, 0)
-                        // Weight: Liked (+3), Rated High (+UserRating)
                         val weight = if (movie.isLiked) 3 else 1
-                        genreCounts[id] = current + weight
+                        val ratingWeight = if (movie.userRating > 0) movie.userRating.toInt() else 0
+                        genreCounts[id] = genreCounts.getOrDefault(id, 0) + weight + ratingWeight
                     }
                 }
             }
 
-            // Get Top 2 Genres
+            // 3. Pick Top Genres
             val topGenres = genreCounts.entries.sortedByDescending { it.value }.take(2).map { it.key }
-
-            // --- LOGGING ---
-            Log.d("RecEngine", "Top Genres Detected: $topGenres")
-            // --- LOGGING ---
+            Log.d("RecEngine", "Winner Genres: $topGenres")
 
             if (topGenres.isEmpty()) return@withContext Result.success(emptyList())
 
             val primaryGenre = topGenres[0]
             val secondaryGenre = topGenres.getOrNull(1)
-
-            // 3. EXECUTE STRATEGIES (The "Three-Pronged" Approach)
             val recommendations = mutableListOf<Movie>()
 
-            // Strategy A: The "Comfort Zone" (Top Genre + High Quality)
-            // Movies in primary genre with rating > 7.0
+            // 4. Query TMDB
+            // Strategy A (Comfort Zone)
             val comfortResponse = apiService.discoverMovies(
                 apiKey = BuildConfig.TMDB_API_KEY,
                 genreId = primaryGenre.toString(),
                 sortBy = "popularity.desc",
                 voteAverageGte = 7.0,
-                voteCountGte = 100 // Ensure valid ratings
+                voteCountGte = 100
             )
             recommendations.addAll(comfortResponse.results.mapNotNull { it.toDomainModel() })
 
-            // Strategy B: The "Mix" (Intersection of Top 2 Genres)
+            // Strategy B (Mix)
             if (secondaryGenre != null) {
                 val mixResponse = apiService.discoverMovies(
                     apiKey = BuildConfig.TMDB_API_KEY,
-                    genreId = "$primaryGenre,$secondaryGenre", // Comma means AND in TMDB (usually) or OR depending on implementation
+                    genreId = "$primaryGenre,$secondaryGenre",
                     sortBy = "vote_average.desc",
                     voteCountGte = 200
                 )
                 recommendations.addAll(mixResponse.results.mapNotNull { it.toDomainModel() })
             }
 
-            // 4. FILTERING
-            // Remove movies the user has already seen (is in DB)
+            // 5. Filter & Shuffle
             val seenIds = seedMovies.map { it.id }.toSet()
-            val finallist = recommendations
+            val final = recommendations
                 .filter { !seenIds.contains(it.id) }
                 .distinctBy { it.id }
-                .shuffled() // Shuffle to mix the strategies
-                .take(20)   // Limit to 20 items
+                .shuffled()
+                .take(20)
 
-            // --- LOGGING ---
-            Log.d("RecEngine", "Generated ${finallist.size} recommendations.")
-            // --- LOGGING ---
+            Log.d("RecEngine", "Final Result: ${final.size} movies.")
+            Log.d("RecEngine", "=== END ===")
 
-            Result.success(finallist)
+            Result.success(final)
 
         } catch (e: Exception) {
+            Log.e("RecEngine", "Error: ${e.message}")
             Result.failure(e)
         }
     }
 }
 
-// --- Mapper Functions ---
+// --- MAPPERS ---
+
 private fun Movie.toEntity(
     isInWatchlist: Boolean? = null,
     isLiked: Boolean? = null
@@ -320,7 +292,6 @@ private fun Movie.toEntity(
         isLiked = isLiked ?: false,
         genres = this.genres.joinToString(","),
         userRating = this.userRating
-
     )
 }
 
@@ -328,24 +299,15 @@ private fun MovieEntity.toDomainModel(): Movie {
     val posterBase = "https://image.tmdb.org/t/p/w500"
     val backdropBase = "https://image.tmdb.org/t/p/w780"
 
-    val fixedPosterUrl = if (this.posterPath?.startsWith("http") == true) {
-        this.posterPath
-    } else {
-        "$posterBase${this.posterPath}"
-    }
-
-    val fixedBackdropUrl = if (this.backdropPath?.startsWith("http") == true) {
-        this.backdropPath
-    } else {
-        "$backdropBase${this.backdropPath}"
-    }
+    val fixedPosterUrl = if (this.posterPath?.startsWith("http") == true) this.posterPath else "$posterBase${this.posterPath}"
+    val fixedBackdropUrl = if (this.backdropPath?.startsWith("http") == true) this.backdropPath else "$backdropBase${this.backdropPath}"
 
     return Movie(
         id = this.id,
         title = this.title,
         posterUrl = fixedPosterUrl ?: "",
         backdropUrl = fixedBackdropUrl ?: "",
-        overview = "",
+        overview = this.overview,
         releaseDate = this.releaseDate,
         rating = this.voteAverage,
         director = "",
@@ -354,7 +316,9 @@ private fun MovieEntity.toDomainModel(): Movie {
     )
 }
 
-// 3. DTO -> Movie (For API Responses in Recommendation Engine)
+// --- NEW: DTO MAPPER FOR RECOMMENDATIONS ---
+// This is required because 'getPersonalizedRecommendations' gets raw DTOs from API
+// and needs to convert them to Domain Movies to return.
 private fun MovieDto.toDomainModel(): Movie? {
     if (this.posterPath == null) return null
     val posterBase = "https://image.tmdb.org/t/p/w500"
@@ -368,7 +332,6 @@ private fun MovieDto.toDomainModel(): Movie? {
         overview = this.overview ?: "",
         releaseDate = this.releaseDate ?: "",
         rating = this.voteAverage ?: 0.0,
-        // Map Genre IDs directly
         genres = this.genreIds ?: emptyList()
     )
 }
