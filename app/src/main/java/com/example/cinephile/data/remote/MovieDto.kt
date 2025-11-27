@@ -15,7 +15,8 @@ data class MovieDto(
     @SerializedName("backdrop_path") val backdropPath: String?,
     @SerializedName("overview") val overview: String?,
     @SerializedName("release_date") val releaseDate: String?,
-    @SerializedName("vote_average") val voteAverage: Double?
+    @SerializedName("vote_average") val voteAverage: Double?,
+    @SerializedName("genre_ids") val genreIds: List<Int>?
 )
 
 // 3. Detailed Movie Info (For Details Screen)
@@ -28,8 +29,11 @@ data class MovieDetailDto(
 
     @SerializedName("release_date") val releaseDate: String?,
     @SerializedName("vote_average") val voteAverage: Double?,
-    val runtime: Int?
+    val runtime: Int?,
+    val genres: List<GenreDto>?
 )
+
+data class GenreDto(val id: Int, val name: String)
 
 // 4. Cast & Crew (For finding Director)
 data class CreditsDto(

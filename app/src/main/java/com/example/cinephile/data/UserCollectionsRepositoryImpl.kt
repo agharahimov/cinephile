@@ -172,6 +172,34 @@ class UserCollectionsRepositoryImpl(
     override suspend fun renameUserList(listId: Long, newName: String) = withContext(Dispatchers.IO) {
         userListDao.renameList(listId, newName)
     }
+
+    override suspend fun setUserRating(movie: Movie, rating: Double) = withContext(Dispatchers.IO) {
+        val existingEntity = movieDao.getMovieById(movie.id)
+
+        val entityToInsert = if (existingEntity != null) {
+            // Update rating, preserve other flags
+            // REQUIREMENT: Rating a movie adds it to watchlist automatically
+            existingEntity.copy(userRating = rating, isInWatchlist = true)
+        } else {
+            // New movie: Set rating and set watchlist to true
+            movie.toEntity().copy(userRating = rating, isInWatchlist = true)
+        }
+        movieDao.insertOrUpdateMovie(entityToInsert)
+
+        // Ensure it's added to the current watchlist relation table too
+        val currentList = userListDao.getCurrentList() ?: return@withContext
+        val join = UserListMovieCrossRef(listId = currentList.listId, movieId = movie.id)
+        userListDao.addMovieToList(join)
+    }
+
+    override suspend fun getUserRatedMovies(): Result<List<Movie>> = withContext(Dispatchers.IO) {
+        try {
+            val entities = movieDao.getRatedMovies()
+            Result.success(entities.map { it.toDomainModel() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 // --- Mapper Functions ---
@@ -189,7 +217,10 @@ private fun Movie.toEntity(
         releaseDate = this.releaseDate,
         voteAverage = this.rating,
         isInWatchlist = isInWatchlist ?: false,
-        isLiked = isLiked ?: false
+        isLiked = isLiked ?: false,
+        genres = this.genres.joinToString(","),
+        userRating = this.userRating
+
     )
 }
 
@@ -217,6 +248,8 @@ private fun MovieEntity.toDomainModel(): Movie {
         overview = "",
         releaseDate = this.releaseDate,
         rating = this.voteAverage,
-        director = ""
+        director = "",
+        genres = if (this.genres.isNotEmpty()) this.genres.split(",").mapNotNull { it.toIntOrNull() } else emptyList(),
+        userRating = this.userRating
     )
 }

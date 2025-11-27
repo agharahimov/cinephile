@@ -27,4 +27,7 @@ interface MovieDao {
 
     @Query("SELECT * FROM movies WHERE isLiked = 1")
     suspend fun getLikedMovies(): List<MovieEntity>
+
+    @Query("SELECT * FROM movies WHERE userRating > 0")
+    suspend fun getRatedMovies(): List<MovieEntity>
 }

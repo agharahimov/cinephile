@@ -32,4 +32,6 @@ interface UserCollectionsRepository {
     suspend fun addMovieToCustomList(movieId: Int, listId: Long)
     suspend fun getAllCustomLists(): Result<List<UserListEntity>> // We can create a domain model for this later
     suspend fun getMoviesInCustomList(listId: Long): Result<List<Movie>>
+    suspend fun setUserRating(movie: Movie, rating: Double)
+    suspend fun getUserRatedMovies(): Result<List<Movie>>
 }

@@ -118,16 +118,14 @@ class MovieRepositoryImpl(
             id = this.id,
             title = this.title,
             posterUrl = "$posterBaseUrl${this.posterPath}",
-
-            // --- NEW: Map the Backdrop URL here too ---
             backdropUrl = if (this.backdropPath != null)
                 "$backdropBaseUrl${this.backdropPath}"
             else
                 "$posterBaseUrl${this.posterPath}",
-
             overview = this.overview ?: "No overview available.",
             releaseDate = this.releaseDate ?: "Unknown",
-            rating = this.voteAverage ?: 0.0
+            rating = this.voteAverage ?: 0.0,
+            genres = this.genreIds ?: emptyList()
         )
     }
 }

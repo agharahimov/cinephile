@@ -104,4 +104,12 @@ class DetailsViewModel(
             checkDatabaseStatus(movie.id) // Refresh UI
         }
     }
+
+    fun rateMovie(movie: Movie) {
+        viewModelScope.launch {
+            userRepo.setUserRating(movie, movie.userRating)
+            // Refresh UI state
+            checkDatabaseStatus(movie.id)
+        }
+    }
 }

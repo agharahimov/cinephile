@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RatingBar
 import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
@@ -74,6 +75,21 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         val btnWatchlist = view.findViewById<LinearLayout>(R.id.btnSheetWatchlist)
         val ivWatchlist = view.findViewById<ImageView>(R.id.ivSheetWatchlist)
         val tvWatchlist = view.findViewById<TextView>(R.id.tvSheetWatchlist)
+
+        val ratingBar = view.findViewById<RatingBar>(R.id.ratingBarSheet)
+
+        ratingBar.setOnRatingBarChangeListener { _, rating, fromUser ->
+            if (fromUser) {
+                // 1. Create copy with new rating
+                val ratedMovie = movieObj.copy(userRating = rating.toDouble())
+
+                // 2. Call ViewModel
+                viewModel.rateMovie(ratedMovie)
+
+                // 3. Feedback
+                Toast.makeText(context, "Rated $rating stars & Added to Watchlist", Toast.LENGTH_SHORT).show()
+            }
+        }
 
         // 4. OBSERVE STATE (This runs automatically when DB changes)
         lifecycleScope.launch {
