@@ -14,5 +14,7 @@ data class Movie(
     val overview: String,
     val releaseDate: String,
     val rating: Double = 0.0,
-    val director: String = ""
+    val director: String = "",
+    val genres: List<Int> = emptyList(),
+    val userRating: Double = 0.0
 )
