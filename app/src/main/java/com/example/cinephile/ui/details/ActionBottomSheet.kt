@@ -78,9 +78,6 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
 
         val ratingBar = view.findViewById<RatingBar>(R.id.ratingBarSheet)
 
-        // 1. PRE-FILL RATING (If available)
-        ratingBar.rating = movieObj.userRating.toFloat()
-
         ratingBar.setOnRatingBarChangeListener { _, rating, fromUser ->
             if (fromUser) {
                 // 1. Create copy with new rating
@@ -97,6 +94,10 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         // 4. OBSERVE STATE (This runs automatically when DB changes)
         lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
+
+                state.userRating?.let {
+                    ratingBar.rating = it.toFloat()
+                }
 
                 // --- UPDATE LIKE VISUALS ---
                 if (state.isFavorite) {

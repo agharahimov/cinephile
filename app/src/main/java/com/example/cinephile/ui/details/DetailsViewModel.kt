@@ -16,6 +16,7 @@ data class DetailsUiState(
     val isLoading: Boolean = false,
     val isFavorite: Boolean = false,
     val isInWatchlist: Boolean = false,
+    val userRating: Double? = null,
     val error: String? = null
 )
 
@@ -33,13 +34,15 @@ class DetailsViewModel(
             // 1. Check Database (Is it already liked/watchlisted?)
             val isFav = userRepo.isMovieLiked(movieId)
             val isWatch = userRepo.isMovieInWatchlist(movieId)
+            val localRating = userRepo.getUserRating(movieId)
 
-            _uiState.value = _uiState.value.copy(isFavorite = isFav, isInWatchlist = isWatch)
+            _uiState.value = _uiState.value.copy(isFavorite = isFav, isInWatchlist = isWatch, userRating = localRating)
 
             // 2. Fetch Full Details from API
             movieRepo.getMovieDetails(movieId)
-                .onSuccess { movie ->
-                    _uiState.value = _uiState.value.copy(movie = movie, isLoading = false)
+                .onSuccess { apiMovie ->
+                    val mergedMovie = apiMovie.copy(userRating = localRating)
+                    _uiState.value = _uiState.value.copy(movie = mergedMovie, userRating = localRating, isLoading = false)
                 }
                 .onFailure {
                     _uiState.value = _uiState.value.copy(error = "Failed to load details", isLoading = false)
@@ -68,8 +71,9 @@ class DetailsViewModel(
         viewModelScope.launch {
             val isFav = userRepo.isMovieLiked(movieId)
             val isWatch = userRepo.isMovieInWatchlist(movieId)
+            val localRating = userRepo.getUserRating(movieId)
             // Update UI State instantly
-            _uiState.value = _uiState.value.copy(isFavorite = isFav, isInWatchlist = isWatch)
+            _uiState.value = _uiState.value.copy(isFavorite = isFav, isInWatchlist = isWatch, userRating = localRating, movie = _uiState.value.movie?.copy(userRating = localRating))
         }
     }
 
