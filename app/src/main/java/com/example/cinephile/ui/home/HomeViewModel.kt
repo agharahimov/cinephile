@@ -34,15 +34,26 @@ class HomeViewModel(
 
     private fun fetchData() {
         viewModelScope.launch {
-            // 1. Get Trending
+            // 1. Get Trending (Keep this as is - it's always good content)
             movieRepo.getTrendingMovies()
                 .onSuccess { movies -> _trendingState.value = HomeUiState.Success(movies) }
                 .onFailure { e -> _trendingState.value = HomeUiState.Error(e.message ?: "Error") }
 
-            // 2. Get Recommendations
-            movieRepo.getRecommendedMovies(userId = 0)
-                .onSuccess { movies -> _recommendationState.value = HomeUiState.Success(movies) }
-                .onFailure { _recommendationState.value = HomeUiState.Error("Failed to load") }
+            // 2. Get Recommendations (SMART LOGIC)
+            // First, try to get personalized suggestions
+            val personalResult = userRepo.getPersonalizedRecommendations()
+
+            personalResult.onSuccess { movies ->
+                if (movies.isNotEmpty()) {
+                    // Success! We have personalized data.
+                    _recommendationState.value = HomeUiState.Success(movies)
+                } else {
+                    // STOP: Do not load generic movies. Tell user what to do.
+                    _recommendationState.value = HomeUiState.Error("Rate or Like movies to see recommendations here.")
+                }
+            }.onFailure {
+                _recommendationState.value = HomeUiState.Error("Rate or Like movies to see recommendations here.")
+            }
         }
     }
 
@@ -63,5 +74,15 @@ class HomeViewModel(
             userRepo.addMovieToWatchlist(movie)
             userRepo.addMovieToCustomList(movie.id, listId)
         }
+    }
+
+    private suspend fun loadGenericRecommendations() {
+        movieRepo.getRecommendedMovies(userId = 0)
+            .onSuccess { movies ->
+                _recommendationState.value = HomeUiState.Success(movies)
+            }
+            .onFailure {
+                _recommendationState.value = HomeUiState.Error("Failed to load")
+            }
     }
 }

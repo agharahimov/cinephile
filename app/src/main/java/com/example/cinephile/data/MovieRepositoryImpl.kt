@@ -102,7 +102,8 @@ class MovieRepositoryImpl(
                 // We combine the overview with the extra info for now
                 overview = "${details.overview}\n\nDirector: $director\nCast: $cast",
                 releaseDate = details.releaseDate ?: "",
-                rating = details.voteAverage ?: 0.0
+                rating = details.voteAverage ?: 0.0,
+                genres = details.genres?.map { it.id } ?: emptyList()
             )
             Result.success(movie)
         } catch (e: Exception) {

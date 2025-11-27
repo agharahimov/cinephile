@@ -12,6 +12,7 @@ import com.example.cinephile.ui.auth.AuthViewModel
 import com.example.cinephile.ui.details.DetailsViewModel
 import com.example.cinephile.ui.favorites.FavoritesViewModel
 import com.example.cinephile.ui.home.HomeViewModel
+import com.example.cinephile.ui.home.RecommendationViewModel
 import com.example.cinephile.ui.quiz.QuizViewModel
 import com.example.cinephile.ui.search.SearchViewModel
 import com.example.cinephile.ui.watchlist.WatchlistViewModel
@@ -75,6 +76,12 @@ class ViewModelFactory(private val context: Context) : ViewModelProvider.Factory
             modelClass.isAssignableFrom(QuizViewModel::class.java) -> {
                 val quizRepo = QuizRepositoryImpl(db.movieDao(), db.userListDao())
                 QuizViewModel(quizRepo) as T
+            }
+
+            // 9. Recommendation
+            modelClass.isAssignableFrom(RecommendationViewModel::class.java) -> {
+                val dbRepo = UserCollectionsRepositoryImpl(db.movieDao(), db.userListDao())
+                RecommendationViewModel(dbRepo) as T
             }
 
             else -> throw IllegalArgumentException("Unknown ViewModel class: ${modelClass.name}")

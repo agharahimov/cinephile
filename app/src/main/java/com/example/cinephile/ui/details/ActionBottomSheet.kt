@@ -36,6 +36,7 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
             args.putString("backdrop", movie.backdropUrl)
             args.putString("overview", movie.overview)
             args.putDouble("rating", movie.rating)
+            args.putIntegerArrayList("genres", ArrayList(movie.genres))
             val fragment = ActionBottomSheet()
             fragment.arguments = args
             return fragment
@@ -50,6 +51,7 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         val args = arguments ?: return
+        val genreList = args.getIntegerArrayList("genres")?.toList() ?: emptyList()
         movieObj = Movie(
             id = args.getInt("id"),
             title = args.getString("title") ?: "",
@@ -58,7 +60,8 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
             backdropUrl = args.getString("backdrop") ?: "",
             overview = args.getString("overview") ?: "",
             rating = args.getDouble("rating"),
-            director = ""
+            director = "",
+            genres = genreList
         )
 
         val factory = ViewModelFactory(requireContext().applicationContext)

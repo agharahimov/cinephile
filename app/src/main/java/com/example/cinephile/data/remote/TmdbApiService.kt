@@ -30,7 +30,11 @@ interface TmdbApiService {
         @Query("primary_release_year") year: String? = null,
         @Query("with_genres") genreId: String? = null,
         @Query("with_people") personId: String? = null,
-        @Query("sort_by") sortBy: String = "popularity.desc"
+        @Query("sort_by") sortBy: String = "popularity.desc",
+        @Query("primary_release_date.gte") releaseDateGte: String? = null,
+        @Query("primary_release_date.lte") releaseDateLte: String? = null,
+        @Query("vote_average.gte") voteAverageGte: Double? = null,
+        @Query("vote_count.gte") voteCountGte: Int? = null
     ): MovieResponseDto
 
     @GET("search/person")
