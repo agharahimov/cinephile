@@ -57,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Recommended For You"
-                android:textColor="@android:color/white"
+                android:textColor="?android:attr/textColorPrimary"
                 android:textSize="20sp"
                 android:textStyle="bold" />
 
@@ -68,7 +68,7 @@
                 android:src="@drawable/ic_arrow_right"
                 android:padding="6dp"
                 android:background="@drawable/bg_circle_transparent"
-                app:tint="#BBBBBB" />
+                app:tint="?android:attr/textColorPrimary" />
             <!-- Make sure bg_circle_transparent exists, or remove background -->
 
         </LinearLayout>
