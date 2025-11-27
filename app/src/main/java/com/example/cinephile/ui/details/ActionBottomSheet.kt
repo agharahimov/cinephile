@@ -95,6 +95,10 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
 
+                state.userRating?.let {
+                    ratingBar.rating = it.toFloat()
+                }
+
                 // --- UPDATE LIKE VISUALS ---
                 if (state.isFavorite) {
                     // YELLOW / GOLD

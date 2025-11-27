@@ -200,6 +200,11 @@ class UserCollectionsRepositoryImpl(
             Result.failure(e)
         }
     }
+
+    override suspend fun getUserRating(movieId: Int): Double = withContext(Dispatchers.IO) {
+        // Return the rating if movie exists, otherwise 0.0
+        movieDao.getMovieById(movieId)?.userRating ?: 0.0
+    }
 }
 
 // --- Mapper Functions ---

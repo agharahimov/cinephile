@@ -114,10 +114,11 @@
         android:numStars="5"
         android:stepSize="0.5"
         android:rating="0"
-        android:progressTint="#2C3E50"
-        android:secondaryProgressTint="#2C3E50"
-        android:progressBackgroundTint="#2C3E50"
-        style="?android:attr/ratingBarStyleIndicator"/>
+        android:isIndicator="false"
+        android:progressTint="#FFD700"
+        android:secondaryProgressTint="#FFD700"
+        android:progressBackgroundTint="#556677"
+        style="@style/Widget.AppCompat.RatingBar"/>
 
     <TextView
         android:layout_width="wrap_content"
