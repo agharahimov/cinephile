@@ -13,5 +13,7 @@ data class MovieEntity(
     val releaseDate: String,
     val isInWatchlist: Boolean = false,
     val isLiked: Boolean = false,
-    val voteAverage: Double = 0.0
+    val voteAverage: Double = 0.0,
+    val genres: String = "",
+    val userRating: Double = 0.0
 )
