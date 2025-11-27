@@ -78,6 +78,9 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
 
         val ratingBar = view.findViewById<RatingBar>(R.id.ratingBarSheet)
 
+        // 1. PRE-FILL RATING (If available)
+        ratingBar.rating = movieObj.userRating.toFloat()
+
         ratingBar.setOnRatingBarChangeListener { _, rating, fromUser ->
             if (fromUser) {
                 // 1. Create copy with new rating
