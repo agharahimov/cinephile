@@ -35,4 +35,5 @@ interface UserCollectionsRepository {
     suspend fun setUserRating(movie: Movie, rating: Double)
     suspend fun getUserRatedMovies(): Result<List<Movie>>
     suspend fun getUserRating(movieId: Int): Double
+    suspend fun getPersonalizedRecommendations(): Result<List<Movie>>
 }

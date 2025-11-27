@@ -1,10 +1,13 @@
 package com.example.cinephile.data
 
+import com.example.cinephile.BuildConfig
 import com.example.cinephile.data.local.MovieDao
 import com.example.cinephile.data.local.MovieEntity
 import com.example.cinephile.data.local.UserListDao
 import com.example.cinephile.data.local.UserListEntity
 import com.example.cinephile.data.local.UserListMovieCrossRef
+import com.example.cinephile.data.remote.MovieDto
+import com.example.cinephile.data.remote.RetrofitClient.apiService
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.domain.repository.UserCollectionsRepository
 import kotlinx.coroutines.Dispatchers
@@ -205,10 +208,99 @@ class UserCollectionsRepositoryImpl(
         // Return the rating if movie exists, otherwise 0.0
         movieDao.getMovieById(movieId)?.userRating ?: 0.0
     }
+
+    override suspend fun getPersonalizedRecommendations(): Result<List<Movie>> = withContext(Dispatchers.IO) {
+        try {
+            // 1. GATHER DATA: Get all Liked or Rated movies
+            val liked = movieDao.getLikedMovies()
+            val rated = movieDao.getRatedMovies()
+            // Combine and remove duplicates
+            val seedMovies = (liked + rated).distinctBy { it.id }
+
+            // 2. BUILD PROFILE: If no data, return empty (or handle in ViewModel)
+            if (seedMovies.isEmpty()) {
+                return@withContext Result.success(emptyList())
+            }
+
+            // Analyze Genres (Count occurrences)
+            val genreCounts = mutableMapOf<Int, Int>()
+            seedMovies.forEach { movie ->
+                // Parse the "12,28" string back to a list
+                if (movie.genres.isNotBlank()) {
+                    val ids = movie.genres.split(",").mapNotNull { it.toIntOrNull() }
+                    ids.forEach { id ->
+                        val current = genreCounts.getOrDefault(id, 0)
+                        // Weight: Liked (+3), Rated High (+UserRating)
+                        val weight = if (movie.isLiked) 3 else 1
+                        genreCounts[id] = current + weight
+                    }
+                }
+            }
+
+            // Get Top 2 Genres
+            val topGenres = genreCounts.entries.sortedByDescending { it.value }.take(2).map { it.key }
+            if (topGenres.isEmpty()) return@withContext Result.success(emptyList())
+
+            val primaryGenre = topGenres[0]
+            val secondaryGenre = topGenres.getOrNull(1)
+
+            // 3. EXECUTE STRATEGIES (The "Three-Pronged" Approach)
+            val recommendations = mutableListOf<Movie>()
+
+            // Strategy A: The "Comfort Zone" (Top Genre + High Quality)
+            // Movies in primary genre with rating > 7.0
+            val comfortResponse = apiService.discoverMovies(
+                apiKey = BuildConfig.TMDB_API_KEY,
+                genreId = primaryGenre.toString(),
+                sortBy = "popularity.desc",
+                voteAverageGte = 7.0,
+                voteCountGte = 100 // Ensure valid ratings
+            )
+            recommendations.addAll(comfortResponse.results.mapNotNull { it.toDomainModel() })
+
+            // Strategy B: The "Mix" (Intersection of Top 2 Genres)
+            if (secondaryGenre != null) {
+                val mixResponse = apiService.discoverMovies(
+                    apiKey = BuildConfig.TMDB_API_KEY,
+                    genreId = "$primaryGenre,$secondaryGenre", // Comma means AND in TMDB (usually) or OR depending on implementation
+                    sortBy = "vote_average.desc",
+                    voteCountGte = 200
+                )
+                recommendations.addAll(mixResponse.results.mapNotNull { it.toDomainModel() })
+            }
+
+            // 4. FILTERING
+            // Remove movies the user has already seen (is in DB)
+            val seenIds = seedMovies.map { it.id }.toSet()
+            val finallist = recommendations
+                .filter { !seenIds.contains(it.id) }
+                .distinctBy { it.id }
+                .shuffled() // Shuffle to mix the strategies
+                .take(20)   // Limit to 20 items
+
+            Result.success(finallist)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 }
 
 // --- Mapper Functions ---
 
+private fun MovieDto.toDomainModel(): Movie? {
+    if (this.posterPath == null) return null
+    return Movie(
+        id = this.id,
+        title = this.title,
+        posterUrl = "https://image.tmdb.org/t/p/w500${this.posterPath}",
+        backdropUrl = if (this.backdropPath != null) "https://image.tmdb.org/t/p/w780${this.backdropPath}" else "https://image.tmdb.org/t/p/w500${this.posterPath}",
+        overview = this.overview ?: "",
+        releaseDate = this.releaseDate ?: "",
+        rating = this.voteAverage ?: 0.0,
+        genres = this.genreIds ?: emptyList()
+    )
+}
 private fun Movie.toEntity(
     isInWatchlist: Boolean? = null,
     isLiked: Boolean? = null
