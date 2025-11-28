@@ -55,4 +55,11 @@ interface TmdbApiService {
         @Path("movie_id") movieId: Int,
         @Query("api_key") apiKey: String
     ): CreditsDto
+
+    // GET VIDEOS (Trailers)
+    @GET("movie/{movie_id}/videos")
+    suspend fun getMovieVideos(
+        @Path("movie_id") movieId: Int,
+        @Query("api_key") apiKey: String
+    ): VideoResponseDto
 }

@@ -59,3 +59,16 @@ data class PersonDto(
     @SerializedName("id") val id: Int,
     @SerializedName("name") val name: String
 )
+
+
+// RESPONSE FOR VIDEOS
+data class VideoResponseDto(
+    @SerializedName("results") val results: List<VideoDto>
+)
+
+// SINGLE VIDEO ITEM
+data class VideoDto(
+    @SerializedName("key") val key: String, // The YouTube ID (e.g., "dQw4w9WgXcQ")
+    @SerializedName("site") val site: String, // e.g., "YouTube"
+    @SerializedName("type") val type: String  // e.g., "Trailer", "Teaser"
+)

@@ -16,7 +16,7 @@ class MovieRepositoryImpl(
 
     private val API_KEY = BuildConfig.TMDB_API_KEY
     private val posterBaseUrl = "https://image.tmdb.org/t/p/w500"
-    private val backdropBaseUrl = "https://image.tmdb.org/t/p/w780" // Wider quality for backdrops
+    private val backdropBaseUrl = "https://image.tmdb.org/t/p/w780"
 
     // 1. SEARCH
     override suspend fun searchMovies(query: String, type: SearchType): Result<List<Movie>> {
@@ -36,7 +36,6 @@ class MovieRepositoryImpl(
                             apiService.searchMovies(apiKey = API_KEY, query = query)
                         }
                     }
-                    // Default fallback
                     else -> apiService.searchMovies(apiKey = API_KEY, query = query)
                 }
 
@@ -72,38 +71,46 @@ class MovieRepositoryImpl(
         }
     }
 
-    // 4. GET MOVIE DETAILS (Updated for Letterboxd Style)
+    // 4. GET MOVIE DETAILS (Updated with Trailer Logic)
     override suspend fun getMovieDetails(movieId: Int): Result<Movie> {
         return try {
-            // 1. Call API for Details
+            // A. Fetch Details
             val details = apiService.getMovieDetails(movieId, API_KEY)
 
-            // 2. Call API for Director/Cast
+            // B. Fetch Credits
             val credits = apiService.getMovieCredits(movieId, API_KEY)
 
-            // 3. Extract Director
-            val director = credits.crew.find { it.job == "Director" }?.name ?: "Unknown"
+            // C. FETCH VIDEOS (New)
+            val videoResponse = apiService.getMovieVideos(movieId, API_KEY)
 
-            // 4. Extract Cast (Top 3)
+            // Find the best YouTube Trailer
+            val trailer = videoResponse.results.find {
+                it.site == "YouTube" && it.type == "Trailer"
+            } ?: videoResponse.results.find { it.site == "YouTube" } // Fallback to any YouTube video
+
+            // Extract Director & Cast
+            val directorName = credits.crew.find { it.job == "Director" }?.name ?: "Unknown"
             val cast = credits.cast.take(3).joinToString(", ") { it.name }
 
-            // 5. Convert to Domain Movie
+            // D. Map to Domain Movie
             val movie = Movie(
                 id = details.id,
                 title = details.title,
                 posterUrl = "$posterBaseUrl${details.posterPath}",
 
-                // --- NEW: Map the Backdrop URL (Horizontal Image) ---
+                // Map Backdrop
                 backdropUrl = if (details.backdropPath != null)
                     "$backdropBaseUrl${details.backdropPath}"
                 else
-                    "$posterBaseUrl${details.posterPath}", // Fallback to poster if no backdrop
+                    "$posterBaseUrl${details.posterPath}",
 
-                // We combine the overview with the extra info for now
-                overview = "${details.overview}\n\nDirector: $director\nCast: $cast",
+                overview = "${details.overview}\n\nDirector: $directorName\nCast: $cast",
                 releaseDate = details.releaseDate ?: "",
                 rating = details.voteAverage ?: 0.0,
-                genres = details.genres?.map { it.id } ?: emptyList()
+                director = "Directed by $directorName",
+
+                // SAVE TRAILER KEY
+                trailerKey = trailer?.key
             )
             Result.success(movie)
         } catch (e: Exception) {
@@ -112,21 +119,19 @@ class MovieRepositoryImpl(
         }
     }
 
-    // Helper Mapper (Updated for Backdrop)
+    // Helper Mapper (Updated to include null trailerKey)
     private fun MovieDto.toDomainModel(): Movie? {
         if (this.posterPath == null) return null
         return Movie(
             id = this.id,
             title = this.title,
             posterUrl = "$posterBaseUrl${this.posterPath}",
-            backdropUrl = if (this.backdropPath != null)
-                "$backdropBaseUrl${this.backdropPath}"
-            else
-                "$posterBaseUrl${this.posterPath}",
+            backdropUrl = if (this.backdropPath != null) "$backdropBaseUrl${this.backdropPath}" else "$posterBaseUrl${this.posterPath}",
             overview = this.overview ?: "No overview available.",
             releaseDate = this.releaseDate ?: "Unknown",
             rating = this.voteAverage ?: 0.0,
-            genres = this.genreIds ?: emptyList()
+            director = "",
+            trailerKey = null // Lists don't need trailers
         )
     }
 }
