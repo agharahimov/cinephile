@@ -42,7 +42,7 @@ The search functionality is not just a filter; it is a context-aware entry point
   - **Scenario A**: If the user has only one default watchlist, long-pressing a movie adds it immediately (reducing clicks).
   - **Scenario B**: If the user has created custom lists, long-pressing triggers a selection dialog to choose the specific destination.
 - **Live Data**: All search results fetch real-time data including posters, backdrops, and ratings from TMDB.
-- <img width="266" height="592" alt="image" src="https://github.com/user-attachments/assets/2cfd8c48-4449-4be1-9768-85093a5c09e1" />
+![search](img/search.png)
 
 
 ### 3. Advanced User Collections (Database Management)
@@ -53,7 +53,7 @@ We moved beyond a binary "Watchlist" to a full collections management system.
 - **Many-to-Many Relationships**: A single movie can exist in multiple lists simultaneously without data duplication in the database.
 - **List Management**: Users can rename or delete lists via a persistent 3-dot menu interface on the Profile screen.
 - **Favorites**: A specialized "Liked" list acts as a quick-access favorites system, which heavily influences the recommendation engine.
-<img width="263" height="591" alt="image" src="https://github.com/user-attachments/assets/7730f440-ac5e-4fe3-9c81-15eccc4b468c" />
+![watchlist](img/lists.png)
 
 
 ### 4. Dynamic Quiz Engine
@@ -67,7 +67,7 @@ The project requirements asked for a quiz based on the watchlist. We built a dyn
   - **Trivia**: "What year was this released?" (The engine generates plausible distractor years, e.g., Actual: 1999, Distractors: 1997, 2001, 1998).
 - **Game Loop**: Features a 15-second countdown timer, score tracking, and immediate visual feedback (Green/Red state changes).
 - 
-<img width="266" height="593" alt="image" src="https://github.com/user-attachments/assets/6f67a491-ea31-49f2-9b94-920915306122" /> <img width="266" height="599" alt="image" src="https://github.com/user-attachments/assets/b95d55dc-ecd2-4c87-a2ad-2a5d3500da50" />
+![quizscreen](img/quiz.png) ![quiz](img/quiz%20question%202.png)
 
 
 ## System Architecture & Design
@@ -182,21 +182,21 @@ The quiz engine ensures replayability by never generating the same quiz twice.
 ### Key Commit Analysis
 
 **feat(logic): Implement Smart Recommendation Engine**
-<img width="946" height="862" alt="image" src="https://github.com/user-attachments/assets/aab88ef2-fdb2-47e5-8c7f-420d51d67508" />
+![recommendation](img/recommendation.png)
 
 This commit represents the core intelligence of the app. It introduced the RecEngine logic, the genre scoring math, and the integration of local user history with remote API discovery.
 
 **feat(ui): Implement Multi-List Selection**
-<img width="1243" height="504" alt="image" src="https://github.com/user-attachments/assets/55c4932c-7ed8-49d1-a6c6-fc2cd759d47d" />
+![multilist](img/multi%20list.png)
 
 This commit significantly improved UX. It introduced the logic to check if a user has multiple lists. If they do, it presents a selection dialog; if not, it "smart adds" to the default list. This reduced user friction by 50%.
 
 **refactor: Migrate to Single Activity Architecture**
-<img width="1260" height="759" alt="image" src="https://github.com/user-attachments/assets/1be9cc73-5ca8-45c5-ba7b-68b207260277" />
+![refactor](img/refactor.png)
 
 An early architectural pivot. We moved away from multiple Activities to a NavHost structure. This solved persistent issues with bottom navigation state and allowed for shared ViewModels across screens.
 
-<img width="1260" height="762" alt="image" src="https://github.com/user-attachments/assets/d15d305a-aed5-4f4f-8e9f-5bb103014716" />
+![favorites](img/favorites.png)
 
 please check all the commits here:
 https://git.unistra.fr/agharahimov/cinephile/-/commits/main
