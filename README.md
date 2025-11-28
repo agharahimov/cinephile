@@ -1,3 +1,6 @@
+VIDEO OF THE PROJECT: https://youtube.com/shorts/8QJl7lFUrig?feature=share
+
+
 # Cinephile - Advanced Movie Discovery & Logic Platform
 
 A native Android application designed for cineastes to discover, track, and gamify their movie-watching experience.
