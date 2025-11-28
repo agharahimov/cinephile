@@ -107,6 +107,7 @@ class MovieRepositoryImpl(
                 overview = "${details.overview}\n\nDirector: $directorName\nCast: $cast",
                 releaseDate = details.releaseDate ?: "",
                 rating = details.voteAverage ?: 0.0,
+                genres = details.genres?.map { it.id } ?: emptyList(),
                 director = "Directed by $directorName",
 
                 // SAVE TRAILER KEY
@@ -131,6 +132,7 @@ class MovieRepositoryImpl(
             releaseDate = this.releaseDate ?: "Unknown",
             rating = this.voteAverage ?: 0.0,
             director = "",
+            genres = this.genreIds ?: emptyList(),
             trailerKey = null // Lists don't need trailers
         )
     }
