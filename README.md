@@ -29,8 +29,8 @@ The application features a hybrid authentication system. We recognized that forc
 - **Gatekeeping Logic**: We implemented a GuestManager utility that intercepts navigation events. If a Guest attempts to perform a write action (Like, Rate, Add to Watchlist), the app intercepts the touch event and presents a modal dialog prompting for account creation.
 - **Visual Polish**: The login screen features a looped cinematic video background with a glassmorphism overlay for inputs, creating an immersive first impression.
 - 
-![login](/img/login.png) ![guest home screen](/img/guest%20home.png)
-
+![Login Screen](img/login.png) 
+![Guest Home Screen](img/guest%20home.png)
 
 
 ### 2. Context-Aware Search & Discovery
