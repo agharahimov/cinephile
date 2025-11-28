@@ -23,6 +23,8 @@ import com.example.cinephile.ui.ViewModelFactory
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import androidx.navigation.fragment.findNavController
+
 
 class ActionBottomSheet : BottomSheetDialogFragment() {
 
@@ -142,24 +144,19 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         }
 
         // 5. CLICK LISTENERS
-        btnWatchlist.setOnClickListener {
-            // The findNavController() here will now work because of the import above
+        btnLike.setOnClickListener {
+            // We use findNavController() to handle the redirection
             GuestManager.checkAndRun(requireContext(), findNavController()) {
+                viewModel.toggleFavorite(movieObj)
+                // Don't show Toast here, ViewModel/UI update handles feedback
+            }
+        }
 
-
-                val uiState = viewModel.uiState.value
-
-                if (uiState.isInWatchlist) {
-                    viewModel.toggleWatchlist(movieObj)
-                    Toast.makeText(context, "Removed from Watchlist", Toast.LENGTH_SHORT).show()
-                } else {
-                    // If you have a dialog for selecting specific lists:
-                    // showAddToListDialog(movieObj)
-
-                    // OR if just toggling default list:
-                    viewModel.toggleWatchlist(movieObj)
-                    Toast.makeText(context, "Added to Watchlist", Toast.LENGTH_SHORT).show()
-                }
+        btnWatchlist.setOnClickListener {
+            GuestManager.checkAndRun(requireContext(), findNavController()) {
+                viewModel.toggleWatchlist(movieObj)
+                dismiss()
+                Toast.makeText(context, "Watchlist Updated", Toast.LENGTH_SHORT).show()
             }
         }
     }
