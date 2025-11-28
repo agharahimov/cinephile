@@ -7,6 +7,7 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.example.cinephile.util.GuestManager
 
 class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
@@ -33,8 +34,12 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
 
         // Navigate to Watchlist
         view.findViewById<View>(R.id.btnGoToWatchlist).setOnClickListener {
-            findNavController().navigate(R.id.action_profileFragment_to_watchlistFragment)
+            // Check if Guest -> Block Access
+            GuestManager.checkAndRun(requireContext(), findNavController()) {
+                findNavController().navigate(R.id.action_profileFragment_to_watchlistFragment)
+            }
         }
+
 
         // Navigate to Settings
         view.findViewById<View>(R.id.btnGoToSettings).setOnClickListener {
@@ -46,9 +51,10 @@ class ProfileFragment : Fragment(R.layout.fragment_profile) {
             }
         }
         view.findViewById<View>(R.id.btnGoToFavorites).setOnClickListener {
-            // Navigate to Favorites Fragment
-            // Make sure you added this Action ID to your nav_graph.xml!
-            findNavController().navigate(R.id.action_profileFragment_to_favoritesFragment)
+            // Check if Guest -> Block Access
+            GuestManager.checkAndRun(requireContext(), findNavController()) {
+                findNavController().navigate(R.id.action_profileFragment_to_favoritesFragment)
+            }
         }
 
     }

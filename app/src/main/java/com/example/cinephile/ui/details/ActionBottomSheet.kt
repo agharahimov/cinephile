@@ -1,5 +1,8 @@
 package com.example.cinephile.ui.details
 
+
+import androidx.navigation.fragment.findNavController
+import com.example.cinephile.util.GuestManager
 import android.app.AlertDialog
 import android.content.res.ColorStateList
 import android.graphics.Color
@@ -139,20 +142,24 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         }
 
         // 5. CLICK LISTENERS
-        btnLike.setOnClickListener {
-            viewModel.toggleFavorite(movieObj)
-        }
-
         btnWatchlist.setOnClickListener {
-            val uiState = viewModel.uiState.value
+            // The findNavController() here will now work because of the import above
+            GuestManager.checkAndRun(requireContext(), findNavController()) {
 
-            if (uiState.isInWatchlist) {
-                // Already added? Remove it.
-                viewModel.toggleWatchlist(movieObj)
-                Toast.makeText(context, "Removed from Watchlist", Toast.LENGTH_SHORT).show()
-            } else {
-                // Not added? Show selection dialog.
-                showAddToListDialog(movieObj)
+
+                val uiState = viewModel.uiState.value
+
+                if (uiState.isInWatchlist) {
+                    viewModel.toggleWatchlist(movieObj)
+                    Toast.makeText(context, "Removed from Watchlist", Toast.LENGTH_SHORT).show()
+                } else {
+                    // If you have a dialog for selecting specific lists:
+                    // showAddToListDialog(movieObj)
+
+                    // OR if just toggling default list:
+                    viewModel.toggleWatchlist(movieObj)
+                    Toast.makeText(context, "Added to Watchlist", Toast.LENGTH_SHORT).show()
+                }
             }
         }
     }

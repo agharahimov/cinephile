@@ -54,6 +54,34 @@ class MainActivity : AppCompatActivity() {
         // Connect Bottom Bar to Controller
         bottomNav.setupWithNavController(navController)
 
+        // --- NEW: INTERCEPT CLICKS FOR GUEST BLOCKING ---
+        bottomNav.setOnItemSelectedListener { item ->
+            when (item.itemId) {
+                // Case 1: The Restricted Tab
+                R.id.recommendationFragment -> {
+                    // Check if Guest
+                    if (com.example.cinephile.util.GuestManager.isGuest(this)) {
+                        // 1. Show the "Login Required" Dialog
+                        com.example.cinephile.util.GuestManager.checkAndRun(this, navController) {
+                            // This block is empty because we only want the dialog to show
+                        }
+                        // 2. Return false prevents the tab from being selected/opening
+                        false
+                    } else {
+                        // User is logged in -> Allow Navigation
+                        navController.navigate(R.id.recommendationFragment)
+                        true
+                    }
+                }
+                // Case 2: All other tabs (Home, Search, Quiz, Profile)
+                else -> {
+                    // Navigate normally
+                    navController.navigate(item.itemId)
+                    true
+                }
+            }
+        }
+
         // 3. VISIBILITY LOGIC (Controls Top Bar, Bottom Bar, Subtitle, and Fullscreen)
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {

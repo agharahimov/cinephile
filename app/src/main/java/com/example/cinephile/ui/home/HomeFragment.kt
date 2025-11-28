@@ -1,6 +1,5 @@
 package com.example.cinephile.ui.home
 
-import android.app.AlertDialog
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -13,9 +12,9 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.cinephile.R
-import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.ui.ViewModelFactory
 import com.example.cinephile.ui.search.MovieAdapter
+import com.example.cinephile.util.GuestManager
 import kotlinx.coroutines.launch
 
 class HomeFragment : Fragment(R.layout.fragment_home) {
@@ -24,6 +23,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private lateinit var trendingAdapter: MovieAdapter
     private lateinit var recommendationAdapter: MovieAdapter
 
+    // --- 1. DEFINE UI VARIABLES (Class Level) ---
     private lateinit var rvTrending: RecyclerView
     private lateinit var rvRecommendations: RecyclerView
     private lateinit var pbTrending: ProgressBar
@@ -31,21 +31,46 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        // --- 2. INITIALIZE VIEWS ---
         rvTrending = view.findViewById(R.id.rvTrending)
         rvRecommendations = view.findViewById(R.id.rvRecommendations)
-        pbTrending = view.findViewById(R.id.progressBar)
+        pbTrending = view.findViewById(R.id.progressBar) // Matches XML id: progressBar
 
+        val tvRecTitle = view.findViewById<TextView>(R.id.tvRecTitle)
         val tvRecPlaceholder = view.findViewById<TextView>(R.id.tvRecPlaceholder)
 
+        // --- NEW GUEST VIEWS ---
+        val layoutGuestMode = view.findViewById<View>(R.id.layoutGuestMode)
+        val btnGuestLogin = view.findViewById<View>(R.id.btnGuestLogin)
+
+        // 3. Init ViewModel
         val factory = ViewModelFactory(requireContext().applicationContext)
         viewModel = ViewModelProvider(this, factory)[HomeViewModel::class.java]
 
-        // --- UPDATED ADAPTER LOGIC ---
+        // ==============================================================
+        // 4. CLICK LISTENER (The Gatekeeper)
+        // ==============================================================
+        // Allows Guests to click "Recommended", but blocks navigation with a dialog
+        tvRecTitle.setOnClickListener {
+            GuestManager.checkAndRun(requireContext(), findNavController()) {
+                findNavController().navigate(R.id.action_homeFragment_to_recommendationFragment)
+            }
+        }
 
-        // Trending List
+        // ==============================================================
+        // 5. SETUP TRENDING (Visible to Everyone)
+        // ==============================================================
         trendingAdapter = MovieAdapter(
-            onMovieClick = { movie -> openMovieDetails(movie.id) },
-            onMovieLongClick = { movie -> showAddToListDialog(movie) } // Show Dialog
+            onMovieClick = { movie ->
+                openMovieDetails(movie.id)
+            },
+            onMovieLongClick = { movie ->
+                // Block Guest from saving to watchlist
+                GuestManager.checkAndRun(requireContext(), findNavController()) {
+                    viewModel.addToWatchlist(movie)
+                    Toast.makeText(requireContext(), "${movie.title} added", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
 
         rvTrending.apply {
@@ -53,23 +78,7 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
         }
 
-        // Recommendation List
-        recommendationAdapter = MovieAdapter(
-            onMovieClick = { movie -> openMovieDetails(movie.id) },
-            onMovieLongClick = { movie -> showAddToListDialog(movie) } // Show Dialog
-        )
-        val btnRecs = view.findViewById<View>(R.id.btnOpenRecommendations)
-
-        btnRecs.setOnClickListener {
-            findNavController().navigate(R.id.action_homeFragment_to_recommendationFragment)
-        }
-
-        rvRecommendations.apply {
-            adapter = recommendationAdapter
-            layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        }
-
-        // (Rest of logic remains the same)
+        // Observe Trending Data
         lifecycleScope.launch {
             viewModel.trendingState.collect { state ->
                 if (state is HomeUiState.Success) {
@@ -79,22 +88,60 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
             }
         }
 
-        lifecycleScope.launch {
-            viewModel.recommendationState.collect { state ->
-                when (state) {
-                    is HomeUiState.Success -> {
-                        rvRecommendations.visibility = View.VISIBLE
-                        tvRecPlaceholder.visibility = View.GONE
-                        recommendationAdapter.submitList(state.movies)
-                    }
-                    is HomeUiState.Error -> {
-                        // Hide List, Show Message
-                        rvRecommendations.visibility = View.GONE
-                        tvRecPlaceholder.visibility = View.VISIBLE
-                        tvRecPlaceholder.text = state.message
-                    }
-                    is HomeUiState.Loading -> {
-                        // Optional: Show a specific loader for this row if you want
+        // ==============================================================
+        // 6. SETUP RECOMMENDATIONS (Guest Logic)
+        // ==============================================================
+        val isGuest = GuestManager.isGuest(requireContext())
+
+        if (isGuest) {
+            // --- GUEST MODE ---
+            // Hide the list and placeholder
+            rvRecommendations.visibility = View.GONE
+            tvRecPlaceholder.visibility = View.GONE
+
+            // Keep Title Visible (so they can click it and see the dialog)
+            tvRecTitle.visibility = View.VISIBLE
+
+            // Show the nice Banner
+            layoutGuestMode.visibility = View.VISIBLE
+
+            // Handle Login Button Click
+            btnGuestLogin.setOnClickListener {
+                findNavController().navigate(R.id.loginFragment)
+            }
+
+        } else {
+            // --- USER MODE ---
+            layoutGuestMode.visibility = View.GONE // Hide Banner
+            tvRecTitle.visibility = View.VISIBLE
+            rvRecommendations.visibility = View.VISIBLE
+
+            recommendationAdapter = MovieAdapter(
+                onMovieClick = { movie -> openMovieDetails(movie.id) },
+                onMovieLongClick = { movie ->
+                    viewModel.addToWatchlist(movie)
+                    Toast.makeText(requireContext(), "${movie.title} added", Toast.LENGTH_SHORT).show()
+                }
+            )
+
+            rvRecommendations.apply {
+                adapter = recommendationAdapter
+                layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            }
+
+            // Observe Recommendations Data
+            lifecycleScope.launch {
+                viewModel.recommendationState.collect { state ->
+                    when (state) {
+                        is HomeUiState.Success -> {
+                            recommendationAdapter.submitList(state.movies)
+                            tvRecPlaceholder.visibility = View.GONE
+                        }
+                        is HomeUiState.Error -> {
+                            tvRecPlaceholder.visibility = View.VISIBLE
+                            tvRecPlaceholder.text = state.message
+                        }
+                        is HomeUiState.Loading -> { }
                     }
                 }
             }
@@ -104,36 +151,5 @@ class HomeFragment : Fragment(R.layout.fragment_home) {
     private fun openMovieDetails(movieId: Int) {
         val bundle = Bundle().apply { putInt("movieId", movieId) }
         findNavController().navigate(R.id.action_global_detailsFragment, bundle)
-    }
-
-    // --- NEW HELPER FUNCTION ---
-    private fun showAddToListDialog(movie: Movie) {
-        viewModel.getUserLists { lists ->
-            if (lists.isEmpty()) {
-                viewModel.addToWatchlist(movie)
-                Toast.makeText(context, "Added to default Watchlist", Toast.LENGTH_SHORT).show()
-                return@getUserLists
-            }
-            // Case 2: Single List -> Direct Add
-            if (lists.size == 1) {
-                val list = lists[0]
-                viewModel.addMovieToSpecificList(movie, list.listId)
-                Toast.makeText(context, "Added to ${list.name}", Toast.LENGTH_SHORT).show()
-                return@getUserLists
-            }
-
-            // Case 3: Multiple Lists -> Show Dialog
-            val listNames = lists.map { it.name }.toTypedArray()
-
-            AlertDialog.Builder(requireContext())
-                .setTitle("Add to which list?")
-                .setItems(listNames) { _, which ->
-                    val selectedList = lists[which]
-                    viewModel.addMovieToSpecificList(movie, selectedList.listId)
-                    Toast.makeText(context, "Added to ${selectedList.name}", Toast.LENGTH_SHORT).show()
-                }
-                .setNegativeButton("Cancel", null)
-                .show()
-        }
     }
 }

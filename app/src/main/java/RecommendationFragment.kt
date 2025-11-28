@@ -1,5 +1,3 @@
-package com.example.cinephile
-
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
@@ -10,6 +8,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.cinephile.R
 import com.example.cinephile.ui.ViewModelFactory
 import com.example.cinephile.ui.home.HomeUiState
 import com.example.cinephile.ui.home.RecommendationViewModel

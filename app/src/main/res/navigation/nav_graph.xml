@@ -20,7 +20,7 @@
     <!-- 2. MAIN TABS -->
     <fragment
         android:id="@+id/recommendationFragment"
-        android:name="com.example.cinephile.RecommendationFragment"
+        android:name="RecommendationFragment"
         android:label="Recommendations"
         tools:layout="@layout/fragment_recommendation" />
     <fragment

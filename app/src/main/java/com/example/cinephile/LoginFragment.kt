@@ -28,6 +28,17 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         super.onViewCreated(view, savedInstanceState)
 
         // =================================================================
+        // 0. CLEAR PREVIOUS SESSION (NEW STEP)
+        // =================================================================
+        // Whenever we land on the Login screen, we assume a new session is starting.
+        // We clear the old username so Guest doesn't inherit User A's data.
+        val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+        with(sharedPref.edit()) {
+            clear() // Wipes "KEY_USERNAME"
+            apply()
+        }
+
+        // =================================================================
         // 1. DEFINE ALL VIEWS FIRST
         // =================================================================
 
@@ -72,7 +83,7 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
                 is AuthState.LoginSuccess -> {
                     // --- SAVE USERNAME LOGIC ---
                     val username = state.user.username
-                    val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
+                    // We reuse the sharedPref variable defined at the top
                     with(sharedPref.edit()) {
                         putString("KEY_USERNAME", username)
                         apply() // Save to memory
@@ -104,7 +115,6 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
         // GUEST
         btnGuest.setOnClickListener {
             // Save "Guest" as the name
-            val sharedPref = requireActivity().getSharedPreferences("UserSession", Context.MODE_PRIVATE)
             with(sharedPref.edit()) {
                 putString("KEY_USERNAME", "Guest")
                 apply()
