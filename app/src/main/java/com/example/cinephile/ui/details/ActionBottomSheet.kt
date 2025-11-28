@@ -1,10 +1,12 @@
 package com.example.cinephile.ui.details
 
+import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
+import android.view.MotionEvent // <--- Added Import
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -14,9 +16,11 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.cinephile.R
 import com.example.cinephile.domain.model.Movie
 import com.example.cinephile.ui.ViewModelFactory
+import com.example.cinephile.util.GuestManager
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -26,7 +30,7 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
     private lateinit var viewModel: DetailsViewModel
     private lateinit var movieObj: Movie
 
-    // OPTION 2 IMPLEMENTATION: Track if we showed the message
+    // Track if we showed the rating message so it doesn't spam
     private var hasShownRatingToast = false
 
     companion object {
@@ -39,7 +43,10 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
             args.putString("backdrop", movie.backdropUrl)
             args.putString("overview", movie.overview)
             args.putDouble("rating", movie.rating)
-            args.putIntegerArrayList("genres", ArrayList(movie.genres))
+            // Handle genre list safely
+            val genreList = ArrayList(movie.genres ?: emptyList())
+            args.putIntegerArrayList("genres", genreList)
+
             val fragment = ActionBottomSheet()
             fragment.arguments = args
             return fragment
@@ -50,11 +57,13 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
         return inflater.inflate(R.layout.bottom_sheet_actions, container, false)
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val args = arguments ?: return
         val genreList = args.getIntegerArrayList("genres")?.toList() ?: emptyList()
+
         movieObj = Movie(
             id = args.getInt("id"),
             title = args.getString("title") ?: "",
@@ -85,24 +94,65 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
 
         val ratingBar = view.findViewById<RatingBar>(R.id.ratingBarSheet)
 
-        // --- RATING LISTENER (UPDATED) ---
+        // ===========================================================================
+        // 1. GUEST BLOCKER FOR RATING (The Gatekeeper)
+        // ===========================================================================
+        ratingBar.setOnTouchListener { _, event ->
+            // Check immediately when the user touches the bar
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                if (GuestManager.isGuest(requireContext())) {
+                    // IF GUEST: Show the "Login Required" Dialog
+                    GuestManager.checkAndRun(requireContext(), findNavController()) {
+                        // This block won't run because they are a guest,
+                        // but the dialog will show.
+                    }
+                    // RETURN TRUE: This stops the touch event here.
+                    // The RatingBar will NOT update visually.
+                    return@setOnTouchListener true
+                }
+            }
+            // IF USER: Return false. This lets the touch pass through to the
+            // RatingBar so they can drag/click the stars normally.
+            false
+        }
+
+        // ===========================================================================
+        // 2. RATING LISTENER (Logic for Logged-in Users)
+        // ===========================================================================
         ratingBar.setOnRatingBarChangeListener { _, rating, fromUser ->
+
+            // --- FIX: SECOND SECURITY CHECK ---
+            // If for some reason the touch listener didn't block it, check here again.
+            if (GuestManager.isGuest(requireContext())) {
+                // Reset the bar visually to 0 (optional, so it doesn't look rated)
+                // ratingBar.rating = 0f
+
+                // STOP. Do not save to DB. Do not add to Watchlist.
+                return@setOnRatingBarChangeListener
+            }
+
             if (fromUser) {
                 // 1. Create copy with new rating
                 val ratedMovie = movieObj.copy(userRating = rating.toDouble())
 
-                // 2. Call ViewModel (Always save to DB)
+                // 2. Save Rating to DB
                 viewModel.rateMovie(ratedMovie)
 
-                // 3. Feedback (Only show ONCE)
+                // 3. ALGORITHM: Auto-Add to Watchlist
+                val currentState = viewModel.uiState.value
+                if (!currentState.isInWatchlist) {
+                    viewModel.toggleWatchlist(ratedMovie)
+                }
+
+                // 4. Feedback
                 if (!hasShownRatingToast) {
                     Toast.makeText(context, "Rated $rating stars & Added to Watchlist", Toast.LENGTH_SHORT).show()
-                    hasShownRatingToast = true // Lock it so it doesn't show again while dragging
+                    hasShownRatingToast = true
                 }
             }
         }
 
-        // 4. OBSERVE STATE (This runs automatically when DB changes)
+        // 4. OBSERVE STATE
         lifecycleScope.launch {
             viewModel.uiState.collectLatest { state ->
 
@@ -138,21 +188,24 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
             }
         }
 
-        // 5. CLICK LISTENERS
+        // 5. CLICK LISTENERS (With Guest Checks)
         btnLike.setOnClickListener {
-            viewModel.toggleFavorite(movieObj)
+            GuestManager.checkAndRun(requireContext(), findNavController()) {
+                viewModel.toggleFavorite(movieObj)
+            }
         }
 
         btnWatchlist.setOnClickListener {
-            val uiState = viewModel.uiState.value
-
-            if (uiState.isInWatchlist) {
-                // Already added? Remove it.
-                viewModel.toggleWatchlist(movieObj)
-                Toast.makeText(context, "Removed from Watchlist", Toast.LENGTH_SHORT).show()
-            } else {
-                // Not added? Show selection dialog.
-                showAddToListDialog(movieObj)
+            GuestManager.checkAndRun(requireContext(), findNavController()) {
+                // Check if it's already in watchlist to toggle removal,
+                // or show the add dialog if you are using lists
+                val uiState = viewModel.uiState.value
+                if (uiState.isInWatchlist) {
+                    viewModel.toggleWatchlist(movieObj)
+                    Toast.makeText(context, "Removed from Watchlist", Toast.LENGTH_SHORT).show()
+                } else {
+                    showAddToListDialog(movieObj)
+                }
             }
         }
     }
@@ -165,7 +218,6 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
                 return@getUserLists
             }
 
-            // Case 2: Single List -> Direct Add
             if (lists.size == 1) {
                 val list = lists[0]
                 viewModel.addMovieToSpecificList(movie, list.listId)
@@ -173,7 +225,6 @@ class ActionBottomSheet : BottomSheetDialogFragment() {
                 return@getUserLists
             }
 
-            // Case 3: Multiple Lists -> Show Dialog
             val listNames = lists.map { it.name }.toTypedArray()
 
             AlertDialog.Builder(requireContext())

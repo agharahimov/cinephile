@@ -33,10 +33,10 @@
                 android:alpha="0.7"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <!-- Gradient -->
+            <!-- Gradient Overlay (Crucial for text visibility) -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="100dp"
+                android:layout_height="120dp"
                 android:background="@drawable/bg_gradient_black_bottom"
                 app:layout_constraintBottom_toBottomOf="@id/ivBackdrop" />
 
@@ -61,7 +61,7 @@
                     android:src="@android:drawable/ic_menu_gallery" />
             </androidx.cardview.widget.CardView>
 
-            <!-- TITLE (Left Side) -->
+            <!-- TITLE -->
             <TextView
                 android:id="@+id/tvDetailTitle"
                 android:layout_width="0dp"
@@ -89,7 +89,7 @@
                 app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
                 app:layout_constraintTop_toBottomOf="@id/tvDetailTitle" />
 
-            <!-- RATING (Small) -->
+            <!-- RATING (TMDB) -->
             <TextView
                 android:id="@+id/tvRatingText"
                 android:layout_width="wrap_content"
@@ -102,25 +102,45 @@
                 app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
                 app:layout_constraintTop_toBottomOf="@id/tvDetailDate" />
 
-            <!-- SYNOPSIS (Tagline style) -->
+            <!-- TRAILER BUTTON (Fixed Alignment) -->
+            <!-- Moved to be BELOW the Rating, aligned LEFT -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnTrailer"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:text="Trailer"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="?attr/colorOnPrimary"
+                android:layout_marginTop="12dp"
+                android:paddingStart="16dp"
+                android:paddingEnd="16dp"
+                app:icon="@android:drawable/ic_media_play"
+                app:iconTint="?attr/colorOnPrimary"
+                app:iconSize="16dp"
+                app:backgroundTint="?attr/colorPrimary"
+                app:cornerRadius="20dp"
+                app:layout_constraintStart_toStartOf="@id/tvDetailTitle"
+                app:layout_constraintTop_toBottomOf="@id/tvRatingText" />
+            <!-- Using theme colors (Purple) instead of hardcoded white for better visibility -->
+
+            <!-- SYNOPSIS -->
             <TextView
                 android:id="@+id/tvDetailOverview"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
-                android:layout_marginStart="24dp"
-                android:layout_marginEnd="24dp"
+                android:layout_marginTop="36dp"
+                android:lineSpacingExtra="6dp"
                 android:text="..."
                 android:textColor="?android:attr/textColorPrimary"
-                android:lineSpacingExtra="6dp"
                 android:textSize="15sp"
-                app:layout_constraintTop_toBottomOf="@id/cardPoster" />
+                app:layout_constraintTop_toBottomOf="@id/btnTrailer"
+                tools:layout_editor_absoluteX="24dp" /> <!-- Pushed down by Trailer button -->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- BACK BUTTON (Fixed Top Left & Transparent) -->
-    <!-- Tint kept White because it sits on top of the Image -->
+    <!-- BACK BUTTON -->
     <ImageButton
         android:id="@+id/btnBack"
         android:layout_width="48dp"
@@ -139,6 +159,7 @@
         android:layout_height="60dp"
         android:layout_margin="16dp"
         app:cardCornerRadius="30dp"
+        app:cardElevation="8dp"
         app:cardBackgroundColor="?attr/colorSurface"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -152,6 +173,7 @@
             android:paddingEnd="16dp"
             android:orientation="horizontal">
 
+            <!-- LOGO (Tinted for Theme) -->
             <ImageView
                 android:layout_width="24dp"
                 android:layout_height="24dp"
