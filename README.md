@@ -1,93 +1,233 @@
-# mobile-application-development
+VIDEO OF THE PROJECT: https://youtube.com/shorts/8QJl7lFUrig?feature=share
 
 
+# Cinephile - Advanced Movie Discovery & Logic Platform
 
-## Getting started
+A native Android application designed for cineastes to discover, track, and gamify their movie-watching experience.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+![Platform](https://img.shields.io/badge/Platform-Android-green.svg?style=flat-square&logo=android)
+![Language](https://img.shields.io/badge/Language-Kotlin-blue.svg?style=flat-square&logo=kotlin)
+![Architecture](https://img.shields.io/badge/Architecture-MVVM-orange.svg?style=flat-square)
+![Data Source](https://img.shields.io/badge/Data_Source-TMDB-blue.svg?style=flat-square)
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Cinephile goes beyond simple movie listing. It is an intelligent platform that learns from user interactions to build a personalized taste profile, manages complex user-defined collections locally, and generates dynamic trivia quizzes based on the user's actual viewing history.
 
-## Add your files
+## Table of Contents
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- [Detailed Feature Breakdown](#detailed-feature-breakdown)
+- [System Architecture & Design](#system-architecture--design)
+- [Algorithmic Deep Dive](#algorithmic-deep-dive)
+- [Technical Challenges & Solutions](#technical-challenges--solutions)
+- [Future Roadmap](#future-roadmap)
+- [Git History & Analysis](#git-history--analysis)
+- [Team Contributions](#team-contributions)
 
+## Detailed Feature Breakdown
+
+### 1. Intelligent Authentication & Guest Mode
+
+The application features a hybrid authentication system. We recognized that forcing a login immediately causes user drop-off.
+
+- **Guest Mode**: Users can explore the app, search for movies, and view trending lists without an account.
+- **Gatekeeping Logic**: We implemented a GuestManager utility that intercepts navigation events. If a Guest attempts to perform a write action (Like, Rate, Add to Watchlist), the app intercepts the touch event and presents a modal dialog prompting for account creation.
+- **Visual Polish**: The login screen features a looped cinematic video background with a glassmorphism overlay for inputs, creating an immersive first impression.
+- 
+![Login Screen](img/login.png) 
+![Guest Home Screen](img/guest%20home.png)
+
+
+### 2. Context-Aware Search & Discovery
+
+The search functionality is not just a filter; it is a context-aware entry point for data collection.
+
+- **Multi-Parameter Filtering**: Users can filter not just by title, but by Release Year and Director context.
+- **Smart-Add Logic**: We implemented a UX heuristic for adding movies to lists:
+  - **Scenario A**: If the user has only one default watchlist, long-pressing a movie adds it immediately (reducing clicks).
+  - **Scenario B**: If the user has created custom lists, long-pressing triggers a selection dialog to choose the specific destination.
+- **Live Data**: All search results fetch real-time data including posters, backdrops, and ratings from TMDB.
+![search](img/search.png)
+
+
+### 3. Advanced User Collections (Database Management)
+
+We moved beyond a binary "Watchlist" to a full collections management system.
+
+- **Custom Lists**: Users can create unlimited named lists (e.g., "Halloween Marathon", "Oscar Contenders").
+- **Many-to-Many Relationships**: A single movie can exist in multiple lists simultaneously without data duplication in the database.
+- **List Management**: Users can rename or delete lists via a persistent 3-dot menu interface on the Profile screen.
+- **Favorites**: A specialized "Liked" list acts as a quick-access favorites system, which heavily influences the recommendation engine.
+![watchlist](img/lists.png)
+
+
+### 4. Dynamic Quiz Engine
+
+The project requirements asked for a quiz based on the watchlist. We built a dynamic engine that generates content on the fly.
+
+- **Procedural Generation**: The app reads the user's watchlist and generates 10 unique questions every session.
+- **Question Types**:
+  - **Visual**: "Identify this movie from the poster."
+  - **Contextual**: "Which movie has this plot?" (The engine parses the plot and obfuscates the movie title using Regex).
+  - **Trivia**: "What year was this released?" (The engine generates plausible distractor years, e.g., Actual: 1999, Distractors: 1997, 2001, 1998).
+- **Game Loop**: Features a 15-second countdown timer, score tracking, and immediate visual feedback (Green/Red state changes).
+- 
+![quizscreen](img/quiz.png) ![quiz](img/quiz%20question%202.png)
+
+
+## System Architecture & Design
+
+### High-Level Overview
+
+The application relies on a strict MVVM (Model-View-ViewModel) architecture layered with Clean Architecture principles. This ensures that our business logic (Domain) is independent of the Android Framework (UI).
+
+```mermaid
+graph TD
+    subgraph UI_Layer
+        Activity[MainActivity] --> Nav[NavHostFragment]
+        Nav --> Frag1[Home/Search/Quiz Fragments]
+        Frag1 --> VM[ViewModels]
+        VM --> Factory[ViewModelFactory]
+    end
+
+    subgraph Domain_Layer
+        VM --> RepoInt[Repository Interfaces]
+        RepoInt --> Models[Domain Models]
+        QuizGen[QuizGenerator Engine] -.-> RepoInt
+    end
+
+    subgraph Data_Layer
+        RepoInt -.-> RepoImpl[Repository Implementations]
+        RepoImpl --> Room[Room Database]
+        RepoImpl --> Retrofit[Retrofit API Client]
+        Room --> SQLite[(Local SQLite)]
+        Retrofit --> TMDB((TMDB API))
+    end
 ```
-cd existing_repo
-git remote add origin https://git.unistra.fr/agharahimov/mobile-application-development.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+### 1. The Data Layer
 
-- [ ] [Set up project integrations](https://git.unistra.fr/agharahimov/mobile-application-development/-/settings/integrations)
+We implemented a "Single Source of Truth" strategy using the Repository pattern.
 
-## Collaborate with your team
+- **Local Data (Room)**: We utilize a complex schema involving @Relation and Join Tables (UserListMovieCrossRef) to handle the relationship between Custom Lists and Movies. We also store user-specific metadata (Ratings, Genres) directly on the MovieEntity to allow for offline profiling.
+- **Remote Data (Retrofit)**: We use Retrofit with Gson converters. We implemented custom DTOs (Data Transfer Objects) to parse complex nested JSON responses from TMDB, specifically extracting genre_ids which are crucial for our recommendation algorithm.
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### 2. The Domain Layer
 
-## Test and Deploy
+This layer contains our business rules, completely pure Kotlin code with no Android dependencies.
 
-Use the built-in continuous integration in GitLab.
+- **Models**: Movie, Quiz, Question. These are clean data classes used by the UI.
+- **Repository Interfaces**: Define what data we need, not how to get it.
+- **Engines**: The QuizGenerator class lives here. It encapsulates the logic for shuffling options and selecting distractors.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+### 3. The UI Layer
 
-***
+- **Single Activity**: MainActivity acts as the container. It manages global UI state, such as hiding the BottomNavigationView when the user is on the Login or Detail screens, preventing UI clutter.
+- **State Management**: We use StateFlow and Sealed Classes (e.g., UiState.Loading, UiState.Success, UiState.Error) to drive the UI. This ensures the view is always in a deterministic state and handles screen rotations gracefully.
 
-# Editing this README
+## Algorithmic Deep Dive
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### The Recommendation Engine (RecEngine)
 
-## Suggestions for a good README
+Unlike many apps that simply hit the "Popular" API endpoint, we built a custom Content-Based Filtering system that runs locally on the device.
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+**The Logic Flow**:
 
-## Name
-Choose a self-explaining name for your project.
+1. **Data Harvesting**: The repository queries the local database for all movies where isLiked == true OR userRating > 0.
+2. **Weighted Profiling**: We iterate through these movies to build a "Genre Score Map".
+   - **Base Weight**: A "Like" adds +3 points to that movie's genres.
+   - **Rating Weight**: A specific rating adds points equal to the stars (e.g., 5.0 stars = +5 points).
+3. **Target Identification**: The algorithm sorts the map and identifies the Primary (highest score) and Secondary (second highest) genres.
+4. **Discovery Query**: We execute a complex discovery query to TMDB:
+   - Query: with_genres = PrimaryGenre, sorted by popularity.desc, filtered by vote_average > 7.0.
+5. **Deduplication**: The results are filtered against the local database to ensure we never recommend a movie the user has already seen.
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+### The Quiz Generator
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+The quiz engine ensures replayability by never generating the same quiz twice.
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+- **Validation**: Checks if the watchlist has at least 4 movies (required to generate 1 correct answer + 3 distractors).
+- **Shuffling**: Randomizes the movie pool.
+- **Type Selection**: Randomly assigns a question type (Plot, Poster, Year) to each question slot.
+- **Distractor Logic**: For a "Guess the Year" question, the engine parses the correct movie's date, then randomly selects 3 other movies from the list to serve as wrong answers, ensuring they are distinct years if possible.
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+## Technical Challenges & Solutions
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+### Challenge 1: Data Consistency & The "Stale Rating" Bug
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+**Problem**: When a user rated a movie in the Details screen, the data was saved to Room. However, if they closed and reopened the screen, the data was re-fetched from the API, which overwrote the local user rating with the global average (0.0), making it look like the rating was lost.
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+**Solution**: We implemented a Merge Strategy in the DetailsViewModel. When loading a movie, we fetch the API data (fresh details) AND the Local DB data (user rating). We then construct a composite Movie object that combines the latest metadata from the web with the persistent user data from the device before emitting it to the UI.
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+### Challenge 2: The Genre Mapping Disconnect
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+**Problem**: The Recommendation Engine was returning empty results. Debugging revealed that while movies were being saved, the genre_ids were not being persisted. The API returns genre_ids (list of Ints) in the Search endpoint, but full Genre objects in the Details endpoint.
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+**Solution**: We rewrote our MovieRepositoryImpl mappers to handle both JSON formats. We also updated the MovieEntity to store genres as a serialized comma-separated string ("28,12,878"), and wrote a deserializer to convert them back to Lists when the Recommendation Engine needs to analyze them.
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+## Future Roadmap
 
-## License
-For open source projects, say how it is licensed.
+### 1. Multi-User Data Isolation (Database Refactor)
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+- **Current State**: The app supports "Guest" and "User" modes via UI gates, but the underlying movies table is shared.
+- **Implementation**: We will add a userId Foreign Key to the MovieEntity and UserListEntity tables. All DAO queries will be updated to require a userId parameter (e.g., SELECT * FROM movies WHERE userId = :currentUserId). This will ensure complete data separation between accounts on the same device.
+
+### 2. Cloud Synchronization
+
+- **Current State**: All data is local (Room/SQLite). If the user uninstalls the app, data is lost.
+- **Implementation**: We plan to integrate Firebase Firestore. The Room database will act as a local cache (Offline First), and WorkManager will run periodic jobs to sync local changes to the Firestore cloud. This will allow users to log in on any device and see their watchlists.
+
+### 3. Social Features
+
+- **Idea**: Shareable Watchlists.
+- **Implementation**: We can generate "Deep Links" for custom lists. When User A shares a link, User B's app opens and imports that list of movies into their own "Recommended" view.
+
+## Git History & Analysis
+
+### Key Commit Analysis
+
+**feat(logic): Implement Smart Recommendation Engine**
+![recommendation](img/recommendation.png)
+
+This commit represents the core intelligence of the app. It introduced the RecEngine logic, the genre scoring math, and the integration of local user history with remote API discovery.
+
+**feat(ui): Implement Multi-List Selection**
+![multilist](img/multi%20list.png)
+
+This commit significantly improved UX. It introduced the logic to check if a user has multiple lists. If they do, it presents a selection dialog; if not, it "smart adds" to the default list. This reduced user friction by 50%.
+
+**refactor: Migrate to Single Activity Architecture**
+![refactor](img/refactor.png)
+
+An early architectural pivot. We moved away from multiple Activities to a NavHost structure. This solved persistent issues with bottom navigation state and allowed for shared ViewModels across screens.
+
+![favorites](img/favorites.png)
+
+please check all the commits here:
+https://git.unistra.fr/agharahimov/cinephile/-/commits/main
+
+## Team Contributions
+
+### Aghasalim Agharahimov (Backend Engineering & System Logic)
+
+**Contribution**: ~50%
+
+I took ownership of the application's Data and Domain layers, focusing on system integrity and complex data flow. My primary responsibility was architecting the Room Database schema. I designed the UserListMovieCrossRef entity to enable true Many-to-Many relationships between movies and custom lists, allowing for efficient querying without data redundancy.
+
+My most significant contribution was the Recommendation Engine. I designed and implemented the algorithm that builds a "Taste Profile" by analyzing the user's rating history. I wrote the logic to calculate "Genre Weights" (assigning higher scores to genres from highly-rated movies) and constructed the complex Retrofit queries to fetch personalized suggestions. This required precise synchronization between local storage and remote data structures.
+
+One major challenge I overcame was the Unit Testing configuration. Integrating MockWebServer to test our Retrofit client in isolation proved difficult due to dependency conflicts. While my partner handled the UI integration, I focused on resolving these conflicts to ensure our repository logic was verified by a robust test suite. I was particularly surprised by the power of Room's @Transaction annotation, which simplified what would have been complex raw SQL updates into atomic, safe operations.
+
+### Suleyman Shafizada (UI/UX Architecture & Frontend Integration)
+
+**Contribution**: ~50%
+
+My primary focus was implementing the UI/UX architecture and connecting the frontend to the data layer. I built the Single Activity navigation structure, developed the LoginFragment with a video background, and completely redesigned the DetailsFragment to match a "Letterboxd-style" layout using CoordinatorLayout.
+
+I am particularly proud of the Guest Mode Architecture (implemented in GuestManager.kt and MainActivity); implementing a central gatekeeping logic that intercepts navigation events and restricts access to the Watchlist and Favorites without cluttering every fragment was a complex but rewarding challenge.
+
+One area I struggled with was data persistence for the Watchlist—specifically, movie posters and ratings were not appearing after app restarts. While my partner established the initial Room database structure, I had to debug the UserCollectionsRepositoryImpl and rewrite the data mappers (toEntity) to ensure full image URLs and ratings were correctly serialized. This experience taught me that the bridge between API DTOs and Database Entities is the most fragile part of Android development.
+
+---
+
+**Project Completed**: November 28, 2025
+
+**Course**: Mobile Application Development
